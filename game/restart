@@ -1,0 +1,49 @@
+#!/bin/csh -f
+#
+# Sole argument is a port number, if desired,
+# if none is given defaults to 4201.
+#
+
+set GAMEDIR = /u1b/games/TINYMUCK2.2/game
+
+if (-f ${GAMEDIR}/restart.no) then
+	echo "Not restarting, restart.no exists."
+	exit
+endif
+
+set muck = `ps -ef | fgrep netmuck | wc -l`
+if ($muck > 1) then
+        echo "Not restarting, game is running already."
+        exit 0
+endif
+
+if (-f core) then
+	echo "Removing core...";
+	rm -f core
+endif
+
+cd $GAMEDIR
+
+if (-r data/in.new.PANIC) then
+	set end = "`tail -1 data/in.new.PANIC`"
+	if ("$end" == "***END OF DUMP***" ) then
+		mv data/in.new.PANIC data/in.new
+		echo "Moving in.new.PANIC to in."
+	else
+		rm data/in.new.PANIC
+		echo "Warning: PANIC dump failed on "`date` | mail games
+	endif
+endif
+
+mv -f data/in data/in.old
+if (-r data/in.new) then
+	mv data/in.new data/in
+else
+	cp data/in.old data/in
+endif
+
+date >> logs/stderr
+
+chmod 600 data/*
+./netmuck data/in data/in.new $1 < /dev/null >>& logs/stderr &
+chmod 600 data/*

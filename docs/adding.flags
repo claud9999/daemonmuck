@@ -1,0 +1,5 @@
+To add a new flag:
+Add a line to the flag table in flag.c
+Edit look.c and add your mods to verbose_examine()
+
+NOTE!  There are only 3 flag bits left!

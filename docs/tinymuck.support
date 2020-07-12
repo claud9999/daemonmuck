@@ -1,0 +1,82 @@
+This file contains the names and e-mail addresses to contact if you
+run into trouble.  In general, their response time is usually faster
+than mine.
+
+If you wish to be put on this list, please send e-mail to me in the
+same format.  You'll have my eternal gratitude for taking this off my
+back.
+
+Name: Chris Dodd
+E-Mail: dodd@cs.stanford.edu
+How I can help:
+I can handle traking down and eliminating noxious bugs.  I can do other
+stuff as well, time permitting.
+
+name:  Lucifer
+email: jguy@lilith.ebay.sun.com
+how I can help:
+
+ I can do docs, misc. bug chasing and some fixes, and have a pretty good handle
+ on the MUF end of things.  I'm working on a more comprehensive MUF Users Guide
+ and Cookbook.  I'll do whatever I can, but work constraints probably keep me
+ from doing really intensive coding-related work on this.
+
+Name: Doug Orleans
+E-Mail: dougo@belch.berkeley.edu
+How I can help:
+Well, I'm not sure yet, but I'll try to do anything you ask me to; otherwise
+I'll work on new commands, instructions, etc.  Nothing big though, at least
+not for now.
+
+Name: Russ "Random" Smith
+E-Mail: russ@uokmax.ecn.uoknor.edu
+
+How I can help:
+ First off, I can help get MUCK up-to-date with some of the MUD modifications
+ it lacks and needs.  As I (admittedly rather rudely) pointed out, some
+ that exist are already based on my work, and I think MUCK could use some
+ further ones (BOT and string compression come to mind).
+
+ In fact, if needed, I could code things that haven't been done before. I
+ do still have good programming ideas occasionally, although I'm not
+ terribly innovative (as compared to some) about theoretical mud changes,
+ as much as implementation procedures and code.
+
+ Besides, I'd love to run the thing.  I really dig programmable muds, and
+ MUCK is (a) the closest to publishable, and (b) database conversionable
+ (what an ugly way to say that).
+
+ Finally, I just dig programming it.  Really.  I've already built a
+ TARDIS for it, and it's a blast.
+
+ The only drawback to having me around is a profound desire to at least
+ be mentioned if anything of mine is used.  I learned that trait from
+ being an amateur fiction writer.
+
+Name: John Callas
+Email: callas@eris.enet.dec.com
+How I can help:
+
+I've been working on a TinyMUCK port to VMS.
+
+To let you what's been going on, I've ported TinyMUCK to VMS, using a DECnet
+transport. I've not yet achieved my goal of allowing both DECnet and TCP, and
+that'll have to wait.
+
+I am interested in supporting TinyMUCK for VMS, and would like to keep in synch
+with the development that the rest of you all are doing.
+
+Name: Jim Mattson
+Email: jmattson@ucsd.edu
+How I can help:
+	I can help track down and repair bugs in the standard distribution,
+	but don't come to me with your local modifications.
+
+Name: Ernest Campbell aka Black_Dougal
+Email: miller@sun1.forestry.auburn.edu	campbell@ducvax.auburn.edu
+How I can help:
+I'm willing to work on just about any nifty mod as long as it doesn't involve
+*major* coding and/or database modification (I think that the designers have
+already decided that that's an 'official' no-no anyways).  Also, since my 
+TigerMUCK is running on a Sun Sparcstation 1, I may be able to offer some
+assistance to others trying to install on Sparcs.

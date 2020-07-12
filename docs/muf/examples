@@ -1,0 +1,45 @@
+: abs        ( i -- i )           (absolute value)
+   dup
+     0 < if -1 * then
+;
+: amt          ( -- i )           (random number between -100 and 100.)  
+    random 21 %
+    10 -
+    10 *
+;
+: give         ( d -- )
+    me @ swap addpennies          (give the player some pennies)
+;
+: msg    ( i s -- d s )
+    swap
+    abs intostr " pennies!"       (make tail half of the message)
+      strcat strcat
+    me @ swap
+;
+: winlose
+    dup
+      dup
+        abs = dup             (is the number we got = to its absolute  )
+      if pop "win" exit       (value?  i.e., is it positive?           )
+      then not if "lose" then
+;                             (send the right message accordingly.     )
+: tell
+    dup
+      winlose "You " swap     (print "You [win/lose] x pennies!"       )
+        strcat " " strcat
+        msg notify
+;
+: announce
+    dup
+      loc @ swap me @ swap 
+               notify         (Tell the player what happened.          )
+      loc @ swap me @ swap
+         notify_except        (Tell everyone else what happened.       )
+;
+: pull
+    amt tell announce give    (Main prog.)
+
+;
+
+                   (Written by WhiteRabbit)
+

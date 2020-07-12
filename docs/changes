@@ -1,0 +1,605 @@
+Changes in TinyMUCK v1.1:
+
+- Some of the bugfixes and modifications done by Scott C. Goehring
+  ("Firefoot") have been added:
+  o the 'has connected' and 'has disconnected' messages are optionally
+    installed (-DCONNECT_MESSAGES in the Makefile)
+  o the !-bug and pronoun-substitution bug have been fixed
+  o the WHO list is tabular, but not reversed (ie., most recently
+    connected players are at the top).  This is hard-coded; there
+    are no additional player flags.
+- a big bug in do_attach has been fixed, it now checks for ownership
+  of the exit.
+- the Typeof(thing) macro now checks for HOME and returns TYPE_ROOM, as it
+  should, so @link exit=home should work properly on all platforms.
+
+Changes in TinyMUCK v1.2
+
+- New database format --- compatibility modes allowed, though.
+- Property lists added.
+- drop, odrop fields added.
+- page now can include a message.
+- locks can now be against properties too.
+- Gender pronoun substitution code uses player's p-list instead.
+
+Changes in TinyMUCK v1.2F (Incorporates Fire Foot's changes)
+
+- ABODE && HAVEN flags optional
+- God cannot be forced, have password changed, or unwizarded.
+- Database read routines changed so that FireFoot's ABODE and HAVEN
+  flags are either ignored or shifted to the new position.
+
+- Sanity checker is back!
+  Usage is:
+	sanity <infile >report file
+
+  The report file will tell you what the problem is as well as giving
+  you the listing.
+
+- Examine now does a "look" and also tells you who owns this object.
+
+Changes in TinyMUCK 2.0
+
+- @prog -- see "forth.ref" and "technical.doc"
+- MUCKER bit must be set to use the above.
+- sanity has been updated to just ignore programs when checking.
+  It should eventually be updated to check program owners and such.
+- m/ directory has been added to distribution --- this directory is
+  used to contain MUF programs.  Hence, restart also "backs up"
+  that directory by moving it to m.old before starting.
+  This directory may contain junk.
+- Changes in look, examine to reflect program changes.
+- Change to trigger to reflect it.
+- Change to game.c to test for interactiveness and act accordingly.
+- Rest of changes concentrated in edit.c, compile.c, interp.c, inst.h
+- wiz.c changed to update @stat command.
+- do_get had to be added.
+- concentrator "added"  Note that conc.c has been slightly changed
+  from the original to run on nyquist.
+  Same thing applies to interface3.c (it differs from Robert's
+  original distributions)  Especially note that writelog has become
+  #defined to printf.  (I don't know where it was originally.)
+- #ifdefs for MIPS (Dec3100) stations.
+- TRUENAMES modifications no longer show names when you look at a
+  linkable player.
+
+Changes in TinyMUCK 2.0.1
+
+- Countless changes, see RCS log for info.
+- This is primarily a bug fix release, though it also does several
+  design changes that should be hidden.
+
+Changes in TinyMUCK 2.1
+
+- New commands: @boot, @edit, @list, @recycle (with -DRECYCLE), @pcreate
+  (with -DREGISTRATION)
+- We now have true recycling of objects, courtesy of jmattson@ucsd.edu,
+  adding a new type, TYPE_GARBAGE, which is considered first
+  before @create makes a new object.
+- Extended WHO list for Wizards.  Shows players' numbers, flags, times,
+  IP address, and game location.
+- Exits may be set DARK by Wizards, to suppress the standard `has arrived.'
+  and `has left.' messages.  This should cut down on noise in areas with
+  osucc'ed exits.
+- interp.c got a major makeover, thanks to jmattson@ucsd.edu and
+  russ@uokmax.ecn.uoknor.edu.  Many #ifdefs replaced with a single #def.
+  Thanks much.
+- Changes in MUF:
+- Command line arguments from russ@uokmax.ecn.uoknor.edu.  Many changes
+  for the exit/action matching algorithm, enabling replacement of system
+  commands as well.
+- TRIGGER variable.
+- RMATCH primitive.
+- OWNER primitive.
+- Six flag-reading primitives, JUMPP, CHOWNP, LINKP, DARKP, TEMPLEP, and
+  STICKYP.  See MUF.manual (formerly forth.ref) for complete details.
+
+In the version of MUF used by Muck 2.1, two MUF program words were changed
+which will make many old MUF programs incompatible.  While this is somewhat
+inconvenient, the changes save a lot of code space and CPU time, and also
+make the language easier to understand since there is less swapping.
+We felt that it would be better to make this change now, while there aren't
+too many MUF programs out there, than to live with MUF being much less
+efficient than it easily could be.
+
+Those changes were:
+
+The order of arguments to the "!" word have been reversed.
+The order of arguments to "explode" have been reversed.
+
+The MUF documentation has been updated to reflect the changes.
+
+Changes in TinyMUCK 2.2
+
+- New command: @trace.
+- New feature: environments.  Allows global commands and allows builders
+  to create their own theme areas.
+- Bugs fixed: @boot, a few memory leaks, problems with the COMPRESS
+  option, many more...
+- Property list strings are now compressed with the COMPRESS option.
+- Player name and primitive hash tables added for speed.
+- Wizard WHO list has been changed again.  Options are numeric IP
+  addresses and all player flags displayed, or hostnames minus player flags.
+- Improved logging: logfiles are created in a separate directory and commands
+  are kept separate from important system messages.
+- Concentrator version 2.0 added.
+- Another makeover for interp.c, including many speed enhancements.
+  Thanks once again to jmattson@ucsd.edu.
+- Changes in MUF:
+- Programs can be triggered via the text fields of objects: the desc, succ,
+  fail, and drop may run programs rather than display text to the user.
+- Macros may be added by MUCKERs to a global pool usable by all
+  programmers.  See edit help; while in the editor type 'h'.
+- COPYOBJ bug fixed; COPYOBJ now deletes the pointer to actions the new
+  object inherits from the old.
+- Changed primitives: RMATCH handles players and objects correctly, in
+  addition to matching appropriate exits/actions.  The six flag primitives
+  from 2.1.1, JUMPP, CHOWNP, LINKP, DARKP, TEMPLEP, and STICKYP have
+  been replaced by one FLAG? primitive.  FLAG? is able to read any flag
+  the MUCK site has been set up with.  All other P primitives, for
+  example ROOMP, PLAYERP, have been changed to question marks:
+  ROOM?, PLAYER?.  CONTENTS no longer returns a list of things but
+  the dbref of the first thing in the object's contents.  This list
+  is then traversed by NEXT.
+- New primitives: ELSE, OVER, PICK, PUT, ROT, ROTATE, GETLINK, PRONOUN_SUB,
+  STRNCMP, STRCUT, STRLEN, INSTR, RINSTR, OK?, TIME, EXECUTE, EXITS,
+  NEXT.
+
+MUF primitives are described in detail in the MUF programmer's reference,
+MUF.manual.  The quick reference should be available on-site as helpfile
+forth.ref.
+
+Changes in TinyMUCK 2.2d
+
+- RWHO server access [uses sigalarms to time]
+- New object type:daemon - daemons are objects that have attached stackframes
+  and which run programs at specified times.
+  * - @ps shows currently running daemons [all of them for wizards, otherwise
+      only the ones you own]
+  * - @kill terminates a daemon
+  * - modified most [hopefully all] primitives so that daemons have the same
+      permissions of their owner
+- @who command - shows descriptors as well as location and site.
+- took out 'dispatch' and replaced it with an array of functions.
+- added a new property 'type'...MUFprops-all properties beginning with '*' are
+  considered MUFprops, and are hidden and can't be @set by normal players,
+  although they can still CLEAR them with @set me = : .  MUFprops are rw only
+  for the owner of the obj.
+- added the 'SILENT' flag...This makes it so that normal operations don't show
+  dbrefs or flags of objects.
+- added the 'AUTHOR' flag...This makes it so that whenever a player sees a dbref
+  and flags, he/she also sees the owner of the object.
+- added the 'MONITOR' flag...shows when players connect and disconnect from
+  anywhere in the mud...WIZARD only.
+- added the 'AUTOSTART' flag...If this and wizard is set on an exit, that exit
+  will be run at boot time.  If the property "_autostart" exists on the exit,
+  the value will be used as the arguements to the exit.
+- players automatically run a MUF specified by the action 'do_connect' on
+  PLAYER_START upon connection, and 'do_disconnect' upon disconnection.  Both
+  actions have to be wizard.
+- a multi-level help system.
+- changed @set to no longer clear properties when given @set obj = :string.
+- now allows objects to be linked to players
+- copyobj no longer has the one-object/run limit...it now bills the player for
+  the cost of the new object.
+- timestamps have been added to objects.
+- turning line numbers on shows line numbers while inserting.
+- passwords are now encrypted, using the standard UNIX encryption routine
+- moving to a new room automatically runs the 'look' action if possible, and
+  checks automagically for looping.
+- New primitives: see game/data/forth.ref
+- nicer @stats
+- MOVETO now works with exits
+- wizards no longer gain $ from recycles.
+- fixes to @recycle to match exits [properly]
+- fixed MANY daemon problems, cleaned up db some...
+- backlinks - a list of objects that are linked TO the object in question
+- backlocks - a list of objects that are locked TO/AGAINST the object in
+  question
+- nextowned - each object has a 'nextowned' field creating a list ala contents
+  of all of the objects owned by a player.  The player's 'nextowned' points to
+  the first element in the list.
+- 'hear' flag on exits - if an exit is linked to a program, any notifies and
+  notify_excepts directed at the object where the exit resides will spawn a
+  daemon.  Setting '_delay' on the exit changes the daemon sleep period.
+  [default 1]
+- backlinks, backlocks, and nextowned are all stored on the db.  They are also
+  used to increase the efficiency of @recycle, @toad, @stats, @find, and @owned.
+- @find now matches exits also.  [so nyah!]
+- wizards can now @boot themselves
+- @boot now boots all connections, not just one
+- created @examine, @properties, @exits, and @contents, which show specific
+  'examine' information.
+- FLAG? now accepts "interactive"
+- replaced the help, man, and news commands with a better,
+  more intuitive system.
+- fixed running program exits by referencing them by dbref #.
+- prefixing a command with '!' allows a wizard to access the system command
+  by that name...
+- program locks now exist...if somone compiles or @recycles a program, it boots   whoever is running/editing the program.
+- @user for wizards doesn't require the passwords.
+- @boot, @toad, and @force all notify the victim and notifies them as to who
+  is doing it.  @force does NOT show what the person is being forced to do,
+  though.
+- wizards can now execute exits by using their dbref #'s, even if not in the
+  same room as the exit.
+- added ++ and -- primitives
+- #define LOCKOUT now works.  disallowed sites are held in LOCKOUT_FILE, one per  line.
+- #define NOLOGINS will allow only wizards to log in when NOLOGIN_FILE exists in  the GAMEDIR.  The contents of the NOLOGIN_FILE are put out to non-wizards who
+  try to connecct.
+- program locks, backlinks, backlocks, and owner lists cleaned up some more.
+- interp_loop is reentrant
+- interpreter is now pseudo-multithreading,  forcing a user INTERACTIVE afte
+  QUANTUM ticks.
+- BEGIN...WHILE...LOOP, FOR...LOOP, and DO...LOOP implemented and an iteration
+  counter installed.
+- ILIMIT/SETILIMIT added to allow changing the iteration limit from within the
+  game.
+- SERIOUS code cleanups
+- some documentation
+- shared-strings have been removed, found them to be a serious problem to work
+  around and a possible leak of memory.
+- TOUPPER, TOLOWER, and CAPS primitives added.
+- @boot fixed up and cleaned up, try @boot me or @boot #dbref.
+- .last property holds last executed command
+- @wall fixed up [thanks to Howard for pointing this out...]
+
+DaemonMUCK:2.2.9
+- propdirs and property permissions added [adhering to MUCK-S convention]
+- NEXTPROP?, PERMS, SETPERMS, SETPROP, and NEXTPROP added.
+- many many many things fixed up...
+- frames removed from player structure...
+- TRUE multithreading...[well, as close as we can get!]
+- oh, LOTs of changes...daemons no longer exist...
+- stringncmp added
+- int, str, dbref, and variable fixed up to take any type of arg
+  [just about...]
+- some db sweeps removed [kudos again to Howie]
+- @stats cleaned up...@ps, @kill, @go rewritten for new process system.
+
+DaemonMUCK:2.2.9.2
+- game.c totally [just about] rewritten to use an array of strings and
+  function pointers.
+  *.command translates to @command.
+- compound names have been fully supported for players, objects, AND exits.
+  NAME now returns only the primary [first] name, FULLNAME returns the full
+  name.
+- changed stack entries and variables to be type long int.
+- made all structs typedef...
+- .shutdown does a notification that the player has shut it down intentionally.
+- .lock obj = #-1 now works [and modified backlocks to support this]
+- various wizard commands changed to allow using dbrefs and such.
+- TOAD ( d d -- ) primitive added
+- bug fixes galore
+
+DaemonMUCK:2.2.10
+- wizards notified when players change their names and they are set MONITOR
+- wizards notified when @boot/@toad/@force.
+- dbreflist.c added, a generic dbreflist package
+- object type specifics reduced greatly.  All objects now have exits,
+  contents, pennies, etc.
+- exits on players can be used by other players if the exit is set JUMP_OK.
+  also works for rooms.
+- NOSPOOF flag added, notifies spoof victim of who is spoofing them.
+- ENTER_OK flag added.  Exits attached to ENTER_OK objects allow players to
+  enter objects.
+- backlinks/backlocks/ownerlists code cleaned up considerably.
+- new_frame limits number of frames one user can have.  Also makes sure frame
+  is allocated and if not returns NULL.
+- .kill -1 and .kill -2 added [see help]
+- moveto/.teleport works to any room that is J or L, if you control the object
+  in question.
+- WHO list shows if the person is INTERACTIVE or not
+- examine shows GOD flag
+- examine format cleaned up
+- .backlinks/.backlocks added
+- ! in interactive mode runs the command as !interactive.
+- JUMP_OK on exits attached to players allows other players to use the actions
+- .pcreate/.toad/.shutdown GOD-only when GOD_PRIVs
+- no more HAVEN ifdefs or ABODE or MUCKER_ALL or BUILDER_ALL or whatever they
+  were called.  To replace MUCKER_ALL/WIZARD_ALL etc. #define DEFAULT_PFLAGS
+  in config.h
+- startup displays a bit more diagnostics
+
+2.2.10.1:
+- fixed .toad up
+- .force now works great on objects
+- FORCE ( d s -- ) works also
+- ! escape from interactive mode removed...have to try another approach later.
+- .who removed, combined with WHO
+- dark players are not AWAKE?, ONLINE, or in CONNECTIONS list...or in WHO.
+- .stats spruced up [but it seems to be broken...I'll check into it]
+- recycled objects are reused lowest first
+- .find and page are free
+- player matching is free
+- addpennies takes pennies away from owner unless wizard
+- examine shows interactive flag
+- .tele fixed
+
+2.2.12
+MUSH verbs added.                                           OPTIONAL FEATURE
+FORCE now parses MUSH style functions and commands.         OPTIONAL FEATURE
+In-line DB dumps.                                           OPTIONAL FEATURE
+Hearing exits now execute first time tic available          OPTIONAL FEATURE
+instead of sleeping 1 second regardless.
+MUSHFUNCTIONS  parses up a string w/MUSH . ( s -- s )       OPTIONAL FEATURE
+CONTROLS?      does d1 control d2? ( d d -- i )
+Pronoun substitution now does MUSH style %0 - %9            OPTIONAL FEATURE
+MUSH verbs don't go interactive and the H flag on objects   OPTIONAL FEATURE
+means HALT  (don't let the object submit commands)
+Added remote pages  rpage Player@Host=Message               OPTIONAL FEATURE
+Added peers command to show hosts player can rpage          OPTIONAL FEATURE
+Sending a kill -INT to the server now works correctly
+2 bug fixes.  One in wild.c wild_match() and do_login
+in wiz.c
+MUSH.README included
+
+DaemonMUCK 0.13
+added line numbers to MUF debug and error output
+fixed bug in @switch
+fixed bug in prims TOLOWER and TOUPPER
+fixed bug in WIZONLY code
+fixed bug in taboo_player_name()
+fixed bug in next_property()
+re-wrote check_site()
+Added wild_match() to @find now for shell like globbing
+Added KILLFRAME to terminate MUF programs stuck in READ w/ disconnected player
+Added 2 new prims.  CONLAST and CONNECTORS
+Added MUF_FAIL option to run a MUF program on all failed commands
+Added check in the prim ILIMIT for an argument less then 5
+Added check in the prim MOVETO for moving rooms to a non-room destination
+Added check in @list for current program being edited.
+Changed FAST_EXITS so that the exit must be set WIZ for a 0 sleep time
+Giving SLEEP an argument of 0 now works correctly
+Check for null in wild_match()
+rcom.c and rpage removed from the server.  Anyone interested in remote pages
+and remote who lists should ftp the source code for mudlink.
+log_conc() removed from log.c
+tabooname.text now uses the same format as reg.text etc.
+
+DaemonMUCK0.14 includes hundreds of changes.
+Added dynamic game parameters similiar to MUSH style @enable/@disable commands.
+However!  Nearlly ALL commands are configurable, and strings are malloced
+instead of static buffers. The new command is named @parameter.
+
+@parameter list              Lists out all game parameters.
+@parameter init              Force the server to re-read the muck.conf file.
+@parameter parameter=value   Change the value of a parameter.
+
+Added the GNU configure scripts for better and more portable compiles.
+PLEASE note that the GNU script is not totally infaliable when it comes to
+include files.  Don't think the configure script will do EVERYTHING you need
+it to do on ALL types of machines.  Be prepared to do a little work yourself
+if needed.
+Foxen's MUF preprocessor has been added.  Its important to note that when
+setting a propdir for defines that the propdir be named '_defs/' and NOT
+'/_defs/'  DaemonMUCK doesn't like the leading '/'
+
+The following are in server $defines.............
+"strip",        "striplead striptail"
+"background",   "0 sleep"
+"repeat",       "loop"
+"instring",     "tolower swap tolower swap instr"
+"rinstring",    "tolower swap tolower swap rinstr"
+
+
+Added the following prims.............
+
+FLOATING POINT OPERATIONS
+---------------------------------------------------------------------------
+pi (  -- p )*                     Returns the valut of pi   3.1415926535
+e (  -- e )*                      Returns the value of e    2.718281828
+frandom ( -- f )*                 Returns a random f between 0 and 1
+                                 (frandom doesn't work on NeXT machines.)
+sin ( f -- f )*                   Sine of f in radians
+cos ( f -- f )*                   Cosine of f in radians
+tan ( f -- f )*                   Tangent of f in radians
+asin ( f -- f )*                  Arc sin of f in radians
+acos ( f -- f )*                  Arc cosine of f in radians
+atan ( f -- f )*                  Arc tangent of f in radians
+atan2 (f1 f2 -- f )*              Convert rect to polar 
+log10 ( f -- f )*                 logarithm to base 10 
+pow ( f1 f2 -- f )*               f1**f2
+sqrt ( f -- f )*                  square root of f
+cbrt ( f -- f )*                  cube root of f
+sinh ( f -- f )*                  Direct hyperbolic function for f
+cosh ( f -- f )*                  Direct hyperbolic function for f
+tanh ( f -- f )*                  Direct hyperbolic function for f
+asinh ( f -- f )*                 Inverse hyperbolic function for f   
+acosh ( f -- f )*                 Inverse hyperbolic function for f   
+atanh ( f -- f )*                 Inverse hyperbolic function for f   
+ceil ( f -- f )*                  Returns intergeral value >= to f
+floor ( f -- f )*                 Returns intergeral value <= to f
+finite ( f -- i )*                Returns 1 if f1 is zero, subnormal, or normal
+isinf ( f -- i )*                 Returns 1 if f is infinity
+isnan ( f -- i )*                 Returns 1 if f is NaN  
+isnormal ( f -- i )*              Returns 1 if f is normal     
+issubnormal ( f -- i )*           Returns 1 if f is subnormal        
+fabs ( f -- f )*                  Returns the absolute value of f  
+remainder ( f1 f2 -- f )*         Returns a remainder of f1 with respect to f2
+lgamma ( f1 -- f i )*             Returns  ln|G(f)|  and the sign of G(f)
+j0 ( f -- f )*                    j an y functions calculate Bessel functions
+j1 ( f -- f )*                    of the first and second kinds for real args 
+y0 ( f -- f )*                    and integer orders.
+y1 ( f -- f )*                    
+jn ( f i -- f )*                    
+yn ( f i -- f )*                    
+erf ( f -- f )*                   Returns the error function of f where
+                                  erf(f) =2/sqrt(pi) *intergralfrom0
+
+erfc ( f -- f )*                  Returns 1.0-erf(f) computed by methods that
+                                  avoid cancellation fror a large f value
+
+SELF MODIFYING CODE
+---------------------------------------------------------------------------
+compile ( d -- i )*               Compile d  Returns the program size 0 if the
+                                  compile was bad
+uncompile ( d -- i )* [wizard]    Uncompile d and free the RAM is consuming
+delete ( d i -- i )*              Delete line i in program d
+       ( d i1 i2 -- i )*          Delete lines i1 thru 12 in program d
+insert ( d i s -- i )*            Insert s at line i in program d
+prog_size ( d -- i )*             Size of program d
+prog_lines ( d -- i )*            Number of lines in program d
+newprogram ( s -- d )*            Create a new program named s
+new_macro ( s1 s2 -- i )*         Enter a macro name s1 with defintion of s2
+kill_macro ( s -- i )* [wizard]   Remove macro s from the macro tree
+get_macro ( s -- s )*             Get the defintion for macro s
+get_lines ( d i1 i2 -- s1...sn)*  Get i1 to i2 lines of program d
+
+NETWORKING
+---------------------------------------------------------------------------
+SOCKET ( -- i )*                   Open a network connection i.
+CONNECT ( i1 s i2 -- i )           Connect socket i1 to host s using port i2.
+CLOSE ( i -- i )*                  Close network connection i.
+READY_READ ( i -- i )*             Is socket i ready for a read?
+READY_WRITE ( i -- i )*            Is socket i ready for a write?
+SOCKET_WRITE ( i s -- i )*         Write s to a socket.
+SOCKET_READ ( i1 i2 -- s )*        Read i2 bytes from a socket i1.
+SOCKET_LAST ( i -- i )*            When socket i was last read/written.
+SOCKET_CONNECTED_AT ( i -- i )*    When socket i was first connected.
+SOCKET_CONNECTED ( i -- i )*       Is socket i in a connected state?
+SOCKET_HOST ( i -- s )*            Hostname socket is connected with.
+All networking prims are WIZARD only.
+
+STRINGS
+---------------------------------------------------------------------------
+striplead (s -- s)         Strips leading spaces from the given string.
+striptail (s -- s)         Strips trailing spaces from the given string.
+strip (s -- s)             This is a built in $define.  "striplead striptail"
+stringpfx (s s2 -- i)      Returns 0 if s2 is a prefix of s. 
+
+TIME
+---------------------------------------------------------------------------
+strftime (s i -- s)       Takes a format string and a SYSTIME integer
+gmtoffset ( -- i)         Offset from Grand Meridian Time in seconds.
+timesplit ( -- 8i )       8 time intergers on the stack 
+gmtsplit ( -- 8i )        8 GMT time intergers on the stack 
+
+MATCHING
+---------------------------------------------------------------------------
+part_pmatch (s -- d)      Partial player name matching with connected users
+smatch ( s s -- i )       Wild card matching, Foxen style.
+
+PROCESSES
+---------------------------------------------------------------------------
+pid ( i -- i)             Returns the pid of the current process.
+ispid? (i -- i)           Does  process id i exist?
+propdir? (d s -- i)       Is property s on d a propdir?
+
+MISC
+---------------------------------------------------------------------------
+abort ( s -- )                  Abort program with error s
+unparseobj ( d -- s )           Returns name-and-flag string for an object.   
+foreground ( -- )* [wizard]     Run program until completion
+background ( -- )*              Swap program out for one time slice
+
+stats ( d -- total rooms exits things programs players garbage )
+checkargs (??? s -- )
+pstack ( i -- )
+  or
+pstack ( i s -- )
+roll ( xN ... x1 N M -- xM ... x1 xN ... xM-1 )
+These MUSH style property setting commands were added........
+
+@aahear      @aclone      @aconnect    @adeath      @adescribe   
+@adisconnect @adrop       @aefail      @aenter      @afailure    
+@ahear       @aleave      @amhear      @amove       @apayment    
+@asuccess    @atport      @ause        @away#       @charges     
+@comment     @cost        @death       @ealias      @efail       
+@enter       @filter      @haven       @idescribe   @idle#
+@infilter    @inprefix    @lalias      @leave       @move        
+@odeath      @odescribe   @oefail      @oenter      @oleave      
+@omove       @opayment    @otport      @ouse        @oxenter     
+@oxleave     @oxtport     @payment     @prefix      @queue       
+@rquota      @runout      @semaphore   @sex         @startup     
+@tport       @use         
+
+#  @idle and @away will set the attribute but no program uses either of them.
+
+
+While these register commands are supported at this time, anyone using them 
+should STOP and start using the more modern @set or & commands for user 
+functions.  Please note that @ve and @wa are both commented out.  They 
+conflict with existing commands are therefore were removed.
+
+@va	@vb  	@vc      @vd   /* @ve */
+@vf     @vg     @vh      @vi      @vj
+@vk     @vl     @vm      @vn      @vo      
+@vp     @vq     @vr      @vs      @vt      
+@vu     @vv     @vw      @vx      @vy      
+@vz  /* @wa */  @wb      @wc      @wd      
+@we     @wf     @wg      @wh      @wi      
+@wj     @wk     @wl      @wm      @wn      
+@wo     @wp     @wq      @wr      @ws      
+@wt     @wu     @wv      @ww      @wx      
+@wy     @wz     @xa      @xb      @xc      
+@xd     @xe     @xf      @xg      @xh      
+@xi     @xj     @xk      @xl      @xm      
+@xn     @xo     @xp      @xq      @xr      
+@xs     @xt     @xu      @xv      @xw      
+@xx     @xy     @xz      
+
+
+These MUSH specific commands were added.............
+
+@@		@allhalt	@cpattr		@clone		@config	
+@decompile	@dolist		@drain		@elock		@emit	
+@eunlock	@function	@gedit#		@grep		@halt	
+@kick		@lemit		@listen		@map		@mexamine+	
+@mps+		@notify		@oemit		@parent		@pemit	
+@poor		@remit		@scan		@search		@select	
+@sweep		@switch		@trigger	@ulock		@uunlock	
+@verb		@wait		@whereis	@wipe		@zemit**
+brief		enter		leave		mexamine	slay	
+think		use		&
+
++  Thse commands conflicted with existing MUCK commands.  They were renamed
+   such that each command started with a 'm' to denote the MUSH version.
+
+#  PennMUSH aliases @gedit to @edit.   @edit is reserved by MUCK for editing
+   MUF programs.  @gedit is now reserved for MUSH attribute editing.
+
+** This server doesn't support Zones.  @zemit returns a message stating such.
+
+
+MUSH style enter and leave aliases should work correctly.
+The MUSH object/wait/semaphore queues have been implimented.
+User defined functions are supported, and are matched in this order.......
+
+Check the player.   (This is a compile time option.)
+Check player contents.
+Check objects in same location.
+Check any global objects.
+
+Objects set NOCOMMAND or HALT are NOT checked for user defined functions.
+
+
+The following MUSH style flags were added.........
+
+AUDIBLE HALT NOCOMMAND PUPPET QUELL SAFE UNFINDABLE VERBOSE VISUAL
+
+
+The following MUSH functions are suported.  Most of these are PennMUSH 1.50
+functions.  Several were added from the MUSH 2.0.9 distribution and a few
+of the existing PennMUSH functions were replaced with more flexable MUSH 2.0
+versions.  STRFTIME was written and added by Howard.
+
+ABS ACOS ADD AFTER ALPHAMAX ALPHAMIN AND ART ASIN ATAN BEEP BEFORE CAPSTR CAT 
+CEIL CENTER COMP CON CONN CONTROLS CONVSECS CONVTIME COS CREATE DELETE DIE DIG 
+DIST2D DIST3D DIV E EDIT ELOCK EQ EVAL ESCAPE EXIT EXP EXTRACT FABS FDIV FILTER
+FIRST FLAGS FLOOR FLIP FOLD FULLNAME GET GET_EVAL GREP GT GTE HASFLAG HOME IDLE
+IDLESECS INDEX INSERT ISDBREF ISNUM ISWORD ITER LATTR LCON LCSTR LDELETE LEXITS
+LJUST LN LNUM LOC LOG LOCATE LOCK LSEARCH LSTATS LT LTE LWHO MATCH MAP MAX 
+MEMBER MERGE MID MIN MOD MONEY MUDNAME MUL NAME NEARBY NEQ NEXT NOT NSORT NUM 
+OBJ OPEN OR OWNER PARENT PARSE PI PMATCH POS POSS POWER R RAND REMOVE REPLACE 
+REPEAT REST REVWORDS RJUST ROOM ROUND S SCRAMBLE SECS SECURE SETQ SETDIFF 
+SETINTER SETUNION SHUFFLE SIGN SIN SORT SQRT SPACE SPLICE SQUISH STARTTIME 
+STRCAT STRFTIME STRLEN STRMATCH SUB SUBJ SWITCH TAN TIME TRIM TRUNC TYPE UCSTR 
+UFUN U V VAL VERSION WHERE WORDPOS WORDS XGET XOR
+
+Changes in 0.15
+MANY bug fixes,  Disk-basing (USE at your own RISK), support for AV's XEVENTS,
+one or two MUSH related fixes.
+
+Oh, and we do expect you to report any bugs/changes you've made, we want to
+make fixes too!

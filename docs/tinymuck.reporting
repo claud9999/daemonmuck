@@ -1,0 +1,22 @@
+Reporting bugs.
+
+Include:
+
+1.	E-Mail Address.
+2.	Where found.
+3.	What causes it (How to replicate)
+4.	Suggested fix.
+
+Don't just send me fixes.  I'm not even going to look at those.
+
+If #3 isn't reliable, then I cannot fix it.
+
+I might decide to implement your fixes in other ways.
+
+Send bug reports to rearl@belch.berkeley.edu
+
+KNOWN BUGS:
+
+1.	Editor sometimes deletes more lines than told to.
+
+I haven't been able to trace this down.

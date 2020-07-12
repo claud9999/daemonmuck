@@ -1,0 +1,51 @@
+#!/bin/sh
+SERVERDIR=/u1b/games/TINYMUCK2.2/game
+SERVERPID=$SERVERDIR/server_pid
+SERVERTOUCH=$SERVERDIR/server_lives
+
+#system specific stuff goes here.
+ps -le | head -1
+ps -le | grep netmuck
+
+#check for a valid pid file
+if [ ! -f $SERVERPID ]; then
+	echo "no server process id in $SERVERPID"
+	exit 2
+fi
+
+# server pid is in the file, created at boot-time
+SPID=`cat $SERVERPID`
+
+# create the touchfile
+touch $SERVERTOUCH
+if [ $? != 0 ]; then
+	echo "cannot create touch file $SERVERTOUCH"
+	exit 2
+fi
+
+# signal the server to remove the touch file
+echo "sending a kill -USR2 to pid $SPID"
+kill -USR2 $SPID
+if [ $? != 0 ]; then
+	echo "kill failed. server must be dead."
+	exit 1
+fi
+
+if [ -f $SERVERTOUCH ]; then
+	echo "touch file is still present. server must be dead"
+	exit 1
+fi
+
+echo "server seems to be alive and kicking"
+
+#signal the server to log status
+echo "sending a kill -USR1 to pid $SPID"
+kill -USR1 $SPID
+if [ $? != 0 ]; then
+	echo "kill failed. server must be dead."
+	exit 1
+fi
+
+echo "server seems to have logged status successfully"
+tail logs/status
+exit 0

@@ -1,0 +1,33 @@
+Wed Jul 15 15:16 INIT: TinyMUCK version starting.
+Wed Jul 15 15:16 LOADING: data/in
+Wed Jul 15 15:16 LOADING: data/in (done)
+Wed Jul 15 15:16 BIND: Port already in use.
+Wed Jul 15 15:25 INIT: TinyMUCK version starting.
+Wed Jul 15 15:25 LOADING: data/in
+Wed Jul 15 15:25 LOADING: data/in (done)
+Wed Jul 15 15:25 BIND: Port already in use.
+Wed Jul 15 15:28 INIT: TinyMUCK version starting.
+Wed Jul 15 15:28 LOADING: data/in
+Wed Jul 15 15:28 LOADING: data/in (done)
+Wed Jul 15 15:28 BIND: Port already in use.
+Wed Jul 15 15:29 INIT: TinyMUCK version starting.
+Wed Jul 15 15:29 LOADING: data/in
+Wed Jul 15 15:29 LOADING: data/in (done)
+Wed Jul 15 15:29 BIND: Port already in use.
+Wed Jul 15 15:29 INIT: TinyMUCK version starting.
+Wed Jul 15 15:29 LOADING: data/in
+Wed Jul 15 15:29 LOADING: data/in (done)
+Wed Jul 15 15:29 SHUTDOWN: on signal 2, code -1073744052
+Wed Jul 15 15:29 DUMPING: data/out.#1#
+Wed Jul 15 15:29 DUMPING: data/out.#1# (done)
+Wed Jul 15 15:31 INIT: TinyMUCK version starting.
+Wed Jul 15 15:31 LOADING: data/in
+Wed Jul 15 15:31 LOADING: data/in (done)
+Wed Jul 15 15:31 ACCEPT: localhost(50106) on descriptor 5
+Wed Jul 15 15:31 WARNING:  Couldn't open data/welcome.text for read.
+Wed Jul 15 15:31 FAILED CONNECT Claudius on descriptor 5
+Wed Jul 15 15:31 FAILED CONNECT Claudius on descriptor 5
+Wed Jul 15 15:31 CONNECTED: Wizard(1) on descriptor 5
+Wed Jul 15 15:31 SHUTDOWN: by Wizard(#1PGW)
+Wed Jul 15 15:31 DUMPING: data/out.#1#
+Wed Jul 15 15:31 DUMPING: data/out.#1# (done)

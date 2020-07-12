@@ -1,0 +1,16 @@
+This is DaemonMuck 0.15 beta
+
+send all bug reports and questions to the daemonmuck mailing list:
+
+daemonmuck@nike.calpoly.edu
+(use daemonmuck-request@nike.calpoly.edu to subscribe)
+
+READ THIS:
+
+Back up your database.  This is a BETA release.  It may have bugs.  We can not
+be held responsible for lost, mangled, or otherwise mutilated databases.
+
+By using this code you are obligating yourself to send us bug reports.
+If you don't know C, please remove this source code and forget you found it.
+Read the documentation in docs/ before you do anything else.
+

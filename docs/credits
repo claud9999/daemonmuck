@@ -1,0 +1,61 @@
+Credits:
+	Thanks to ChupChup[s] for all the work he's/they've done.
+
+	Thanks to Foxen and the crew at XRoads for some of their fantastic
+	ideas and some of their code.
+	Especially ideas for the propdir changes...and for a reentrent interp.
+
+	Thanks also to Sthiss/*fox for some of the ideas and help.
+
+	Thanks to mjr for the RWHO server code and ideas.
+
+	All the players on PythonMUCK for coming up with ideas galore.
+
+	auzzie->the ADDRESS? primitive idea.
+
+	Mizue->pointing out the long-existing bug with welcome_user.
+
+	MAGE writers->for writing a Better [tm] news, man, and help, and for
+		coming up with the '!' !interactive escape.
+
+	Spike->for the backlinks/proglocks idea, as well as providing the help,
+	man, and news commands.
+
+	byte->for digging up bugs where we thought there weren't any. :)
+
+	Howard->"interactive" flag?  Lots and LOTS of ideas and testing.
+		TOUPPER/TOLOWER/CAPS, lots of bug fixes, nice features,
+		providing us the code for help, man, etc.  MUSH features.
+                floating point operations, networking prims, etc.
+                DEFINITELY check out Howard's really keen program MUDLINK
+                available at a theatre nearest you.  (ftp.tcp.com)
+
+	Doran->coding and many ideas on the daemons, coding of the @who and
+	rwho server interface, the timestamps, do_connect, do_disconnect,
+	passwd encryption, "silent", and "author".  Reentrancy of the
+	interpreter, looping constructs, "quell" flag.
+
+	Claudius->coding of most of the new primitives, designing the split of
+	the dispatch loop, mods to @set and @link, LOOKING and related things,
+	line numbers during insert mode, fixing of the do_connect and
+	do_disconnect, changing the format of @who, changing @stats and examine,
+	fixing some bugs in rwho, fixing many bugs with the original code, 
+	changing @find, @stats, etc...backlinks, backlocks, nextowned,
+	most of the documentation.  The list validation code...
+	pseudo-multithreading, mondo bug fixing and cleanup.  ILIMIT/SETILIMIT
+	Object type unspecific-izing...NOSPOOF/ENTER_OK/JUMP_OK on exits...
+
+	Lyssa->support and nagging of Claudius.
+
+	[All of our code is OURS although much of it is written after seeing
+	what others have done...we've tried to make it efficient and as clean
+	looking as possible.]
+
+If you would like to get more information, make comments, join PythonMUCK,
+tell us off, or just plain old talk to us, we're:
+claudius@zeus.calpoly.edu
+awozniak@zeus.calpoly.edu
+[Lyssa prefers to remain anonymous]
+
+Also, there is a support mailing list...mail
+daemonmuck-request@zeus.calpoly.edu for info.

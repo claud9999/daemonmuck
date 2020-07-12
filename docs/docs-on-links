@@ -1,0 +1,250 @@
+[ Written by Garrett (durrell@hus4.harvard.edu) on TinyMUCK 1.1.  Still
+  quite valid in these days of 2.2 and MUF. ]
+
+			    Table O' Contents
+
+I. General Concepts
+	A. Terminology and Basic Stuff
+	B. Sources and Destinations: A List
+	C. Notes on Links With Source: Object
+	D. Metalinks
+	E. Multiple Destinations
+
+II. Techie Talk
+	A. New Commands and Flags
+	B. Modified Commands and Flags
+
+III. Example
+
+I. General Concepts
+
+This manual assumes that you have a working knowledge of TinyMUD. 
+'Working knowledge' means that you understand the room/exit/object 
+paradigm - you know how to dig rooms, link them together with exits, 
+and so on. If you don't, a lot of what follows will not make sense to 
+you.
+
+A. Terminology and Basic Stuff
+
+TinyMUCK generalizes the concept of links. In TinyMUD, an exit links a 
+room to another room. In TinyMUCK, literally anything can be linked to 
+anything else. Links/exits are activated in the normal way, by typing 
+the name of the link (north, for instance), but depending on what their 
+source is and what they are linked to, they may have a variety of 
+effects.
+
+Link is the term we shall use throughout this manual. Know that links 
+are often also called actions or exits.
+
+More terminology: source and destination. The source is the thing that 
+the link is 'on'. The destination is the thing to which the thing is 
+linked. For example, if you have State St., with an exit 'north' 
+leading to N. State St., State St. is the source and N. State St. is 
+the destination.
+
+B. Sources and Destinations: A List
+
+Here's a quick list of possible sources and destinations, with an 
+explanation of the effects:
+
+room 	->	room
+
+	The kind of link you know and love. Takes the player
+	activating it from the first room (source) to the second
+	room (destination).
+
+room	->	object
+
+	Brings the object (destination) into the room (source).
+
+room	->	player
+
+	Brings the player activating the link to the location of
+	the player who is the destination.
+
+object	->	room
+
+	Brings the player activating the link to the destination
+	room.
+
+object	->	object
+
+	This one is tricky. There are two possibilities.
+	
+	a) The link is not set STICKY. In this case, the source
+	   object goes home and the destination object appears in
+	   its place.
+
+	b) The link is set STICKY. In this case, the destination 
+	   object appears, but the source object does not go home.
+
+object	->	player
+
+	This brings the player activating the link to the location
+	of the destination player.
+
+player	->	room
+
+	This brings the player (only the player who is the source
+	of this link may activate it, as is true for all links for
+	which the source is a player) to the destination room.
+
+player	->	object
+
+	This brings the destination object into the activating 
+	player's inventory.
+
+player	->	player
+
+	This brings the player to the location of the destination
+	player. (However, see the section on the JUMP_OK flag.)
+
+C. Notes on Links With Source: Object
+
+Some notes: if you activate a link from an object, and that link is
+a STICKY link to another object, and the source object is in your 
+inventory, the source object will remain in your inventory after the 
+link is activated.
+
+If the link does have another object as the destination, the 
+destination object will appear in your inventory regardless of what 
+flags have been set on the link.
+
+D. Metalinks
+
+The astute will have noticed one rather interesting possibility left 
+out in all of the above. What about links to other links? This is 
+indeed possible. Such links are called 'metalinks'.
+
+A link linked to another link simply activates the second link when the 
+first link is activated. This allows for some interesting 
+possibilities. For example, one might want a link in one room to move 
+an object into another room. One would simply link the link in the 
+first room to a link in the second room. This second link would be 
+linked to the object.
+
+Important notes about metalinks:
+
+a) Locks do not work through metalinks. If the link my metalink is 
+   linked to is locked against me, but the metalink is not, I can still 
+   activate the link through the metalink.
+
+b) Similarly, any messages associated with destination links are not 
+   displayed to anyone.
+
+E. Multiple Destinations
+
+Yes, you can link a link to more than one destination. It's treated as 
+though the single link was multiple links. For example, if one has a 
+link linked from a room to both another room and an object, the 
+activating player will be taken to the destination room and the 
+destination object will be moved into the source room.
+
+As one might imagine, this is particularly useful with metalinks.
+
+
+II. Techie Talk
+
+Now for the fun stuff: how is this all done?
+
+A. New Commands and Flags
+
+There are two new commands and one new flag. The commands are @action 
+and @attach, and the flag is JUMP_OK.
+
+@action: This is a generalized form of @open. The syntax is:
+
+	@action <name> = <source>
+
+This will simply open an unlinked link with <name> as the name, and 
+<source> as the source. You must still link it to whatever you wish it 
+to have as its destination.
+
+@attach: This allows one to change the source of a link. Syntax:
+
+	@attach <name> = <new source>
+
+This moves the link named <name> to whatever is named <new source>. You 
+must, of course, own this thing.
+
+JUMP_OK: One cannot use a link to a player if the destination player is
+not set JUMP_OK. Also, there might be something odd about links in rooms
+unowned by link owner, if the room isn't jump_ok. look it up.
+
+B. Modified Commands and Flags
+
+@link and LINK_OK have slightly modified effects and/or syntax.
+
+@link has been modified to allow multiple destinations. New syntax:
+
+	@link <link> = <dest 1> <dest 2> <dest 3> ... <dest n>
+
+Note: each destination is separated by spaces.
+LINK_OK now applies to absolutely anything. Objects, players, and
+links themselves can be LINK_OK, and you will see their numbers,
+just as you see the numbers of LINK_OK rooms. You may link an exit 
+to anything that is LINK_OK, or that you own. Only one player or
+room can be a destination of a link; therefore you cannot have a
+link that is linked to two or more players, or two or more rooms,
+or both a room and a player, etc. 
+
+III. Example
+
+-------                     --------------                 ----------------
+| egg | -- open egg ------> | eggshell a | <---- exit a -- | storage room |
+-------                |    --------------   ^             ----------------
+   ^                   |                     |
+   |                   |    --------------   |
+   |                   |--> | eggshell b | ----- fix egg ---
+   |                        --------------                 |
+   |                                                       |
+   ---------------------------------------------------------
+
+What's going on here:
+
+The arrows are links. The names are, well, names. A list of links:
+
+        link            source          destination
+
+        open egg        egg             eggshell a, eggshell b
+        fix egg         eggshell b      exit a, egg
+        exit a          storage room    eggshell a
+
+What happens: you type 'open egg.' The egg goes away, and the two 
+eggshells appear in its place. You then type 'fix egg.' Two things 
+happen. First of all, the egg appears, because the link is linked to 
+the egg, and eggshell b vanishes, because that's the way object -> 
+object links work. Secondly, exit a is activated, because 'fix egg' is 
+*also* linked to that. This exit brings eggshell a from whereever it is 
+to the storage room, and thus it vanishes from your hand as well. You 
+are left with the original egg.
+
+Commands to do all this:
+
+Well, first let's define some numbers, for the sake of argument.
+
+        object          number
+
+        egg             1000
+        eggshell a      1010
+        eggshell b      1020
+        storage room    1030
+        open egg        1040
+        fix egg         1050
+        exit a          1060
+
+OK. Commands, assuming we begin in the storage room, and that the 
+objects have already been created:
+
+@action open egg  = egg             ; attach 'open egg' to the egg
+@action fix egg   = eggshell b      ; attach 'fix egg' to eggshell b
+@action exit a    = here            ; attach 'exit a' to the storage
+                                    ; room. This could also be
+                                    ; '@open exit a'.
+@link open egg    = 1010 1020       ; link 'open egg' to the eggshells
+@link fix egg     = 1000 1060       ; link 'fix egg' to the egg and to
+                                    ; exit a
+@link exit a      = 1010            ; link 'exit a' to eggshell a
+
+That's it!
+

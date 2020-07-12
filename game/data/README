@@ -1,0 +1,17 @@
+This is where all online help documents and database files should
+normally go.  If your database is to go elsewhere, please change
+the 'restart' script for your site.
+
+The 'in' file is the initial database to be used with the game.
+It is the 'minimal.db' for the server.  It contains two objects; a room and
+a Wizard chararacter. The player is 'Wizard' with the password 'foo'.
+
+Also, the lockout.text for sites you don't wish to connect should go here.
+The reg.text is for sites that must register.  The tabooname.text are those
+sub strings that may not be used in player names.  The lockout.msg file is
+sent to sites that have been banned.  The wizonly.text file is sent to players
+when the Wizard only login feature has been enabled.
+
+Do not under any circumstances delete the *.indx files or attempt to hand
+modify them.  They are self updating.  Simply vi the associated *.text file
+and everything will sort itself out.

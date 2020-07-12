@@ -1,0 +1,41 @@
+DICTIONARY OF MUF EDITOR COMMANDS
+---------------------------------
+
+See @PROG and @EDIT in the MUCK Reference Sheets for information about
+enterting the editor.
+
+<number> i
+Enter insert mode before line #i. Any number of lines may be contiguously
+inserted.  The old line #i will become the first line after the inserted
+lines.  Blank lines are ignored and do not become part of the program.
+Entering the character `.' (period) alone on a line (not preceded or
+followed by any spaces) exits insert mode. The `.' does not become a line.
+
+<number1> <number2> l
+Display all lines from <number1> to <number2> inclusive. If only one <number>
+is given, only that line will be displayed.
+
+<number1> <number2> d
+Delete all lines from <number1> to <number2> inclusive. If only one <number>
+is given, only that line will be deleted.
+
+c
+Compile the program you are editing. This must be done before a program will
+run properly.
+
+u
+Unassemble program. This was used to test MUF during its development. It
+has no real use for programmers.
+
+n
+Toggle display of numbers in program listings.
+
+q
+Quit from the editor. @Q may also be used to do this.
+
+<name1> <name2> s
+Show macros in long format: name of macro, name of the person who entered it,
+and the body of the macro.  `a z s' will show all macros, for instance.
+
+<name1> <name2> a
+Abridged macro display.  Shows only the names of macros.

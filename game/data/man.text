@@ -1,0 +1,1613 @@
+&&& man
+        The following topics are currently indexed:
+
+                TOPIC           description
+                -----           -----------
+                flow            flow control primitives
+                operands        mathematical and other
+                logic           logical
+                tests           test
+                stack           stack
+                string          string
+                property        property-related
+                conversions     data conversion
+                db              db operations
+                interaction     player interaction operations
+                stamp           timestamp operations
+                time            game time operations
+                descriptor      descriptor operations
+                system          system parameters
+                files           MUF text files
+                processes       MUF programs being executed 
+                floating        floating point operations
+                programming     manipulating and compiling programs/macros
+                networking      network communications
+        Type 'man <topic>' to get specific information.
+
+        primitives listed with a trailing * are local to this server version
+        primitives with "[wizard]" after them are wizard-only
+&&& flow
+Flow control:
+if ( i -- ) [else] then  Standard if construct, 0 is false
+call ( d -- ? )          call another program [nothing is sacred]
+sleep ( i -- )*          Makes the frame sleep for i seconds
+begin ( -- )*            marks the begining of a BEGIN .. WHILE .. LOOP
+while ( i -- )*          execute the body of the while loop if i is nonzero
+do ( -- )*               marks the beginning of DO .. LOOP
+for ( i1 i2 i3 -- i1 )*  initiates a FOR .. LOOP  i1 is the begin,
+                           i2 is the end, and i3 is the stepsize.
+                           Each run through the loop will place the new
+                           value of the counter on the stack.
+loop ( -- )*             terminates the above loops.
+jmp ( a -- )*            jump to address
+
+An iteration counter has been added to the server.  If you get an iteration
+overflow it means you have written too large a loop.  See "man system"
+&&& if
+if ( i -- )
+format:
+<<condition>> if <<true block>> [else <<false block>>] then
+
+The if command will execute the block between it and the then [or the else] if
+the value on the top of the stack is not 0, and the block after the else if the
+value is 0.
+&&& else
+See 'man if'.
+&&& then
+See 'man if'.
+&&& call
+call ( d -- ? )
+Call hands execution over to a program specified by the dbref on the top of the
+stack.  You either have to own the program being called or it has to be
+LINK_OK.  Be aware that when the program called finishes, it returns control to
+the caller, and the stack will be in the state that the called program left it
+in.
+&&& sleep
+sleep ( i -- )
+Sleep causes the current program to 'sleep' for i seconds.
+
+Technical information:  When a player starts a program and that program does a
+sleep call, the program execution pauses for a designated time.
+An example program:
+  : main me @ "test" notify 60 sleep main ;
+This will run an endless loop that notifies you every 60 seconds with the
+"test" message.  To stop the program use @kill <pid>.
+&&& while
+while ( i -- )
+format: begin <<conditional block>> while <<block>> loop
+
+The conditional block is executed, and if the result is true [not 0] then the
+block between the while and loop instructions are executed, and the
+conditional block is again executed.
+&&& begin
+See 'man while'
+&&& do
+do ( -- ) loop ( i -- )
+format: do <<block>> <<conditional>> loop
+
+do repeats the loop until the conditional is false.  The loop pops the
+conditional result off the stack.
+
+for ( i i i -- i )
+format: <<initialization>> for <<block>> loop
+
+The parameters to the for primitive are: the starting number, the ending
+number, and the size of the step [size of 0 would result in an endless loop].
+The for primitive pushes the current value onto the stack and then executes
+the block of code.  A for loop is ALWAYS run at least once.
+&&& loop
+loop terminates a for, while, or do loop.  See 'man for', 'man while', and
+'man do'
+&&& operands
+Operands:
++ ( i i -- i )                          Add items
+- ( i i -- i )                          Subtract items
+* ( i i -- i )                          Multiply items
+/ ( i i -- i )                          Divide items
+% ( i i -- i )                          Integer modulo division [remainder]
+                                        See remainder for floating points
+| ( i i -- i )*                         bitwise or
+& ( i i -- i )*                         bitwise and
+<< ( i i -- i )*                        bit shift left
+>> ( i i -- i )*                        bit shift right
+~ ( i -- i )*                           bitwise not operation
+< ( i i -- i )                          Less than
+> ( i i -- i )                          Greater than
+= ( i i -- i )                          Equals
+<= ( i i -- i )                         Less than or equals
+>= ( i i -- i )                         Greater than or equals
+dbcmp ( d d -- i )                      Compare two dbrefs, 1 = same
+random ( -- i )                         a random # from 0 to MAXINT
+@ ( v -- x )                            variable referencing
+! ( x v -- )                            variable dereferencing
+++ ( v -- )*                            increments contents of v
+-- ( v -- )*                            decrements contents of v
+&&& logic
+Logical operators:
+and ( i i -- i )                        logical and
+or ( i i -- i )                         logical or
+not ( i -- i )                          logical not
+&&& tests
+Tests:
+number? ( s -- i )                      is the string a valid number?
+player? ( d -- i )                      is the dbref a player?
+thing? ( d -- i )                       is the dbref a thing?
+room? ( d -- i )                        is the dbref a room?
+program? ( d -- i )                     is the dbref a program?
+exit? ( d -- i )                        is the dbref an exit?
+ok? ( d -- i )                          is the dbref >0 and not recycled?
+awake? ( d -- i )*                      how many times a player is connected
+set ( d s -- )                          set a flag
+flag? ( d s -- i )                      test a flag
+getflags ( d -- i )*                    returns the whole flag int
+int? ( x -- i )*                        is item an int?
+string? ( x -- i )*                     is item a string?
+dbref? ( x -- i )*                      is item a dbref?
+var? ( x -- i )*                        is item a variable?
+locked? ( d -- i )*                     is the dbref locked?
+passlock? ( d1 d2 -- i )*               does d1 pass the lock on d2?
+password? ( d s -- i )*                 is s the password for player d?
+okplayer? ( d s -- i )*                 is s a legal name for player d?
+controls? ( d1 d2 -- i )*               does d1 control d2?
+&&& stack
+Stack operations:
+pop ( x -- )                            pop off top element
+dup ( x -- x x )                        duplicate top element
+swap ( x1 x2 -- x2 x1 )                 swap top two elements [2 rotate]
+over ( x1 x2 -- x1 x2 x1 )              duplicate second object [2 pick]
+pick ( x1 ... xN N -- x1 ... xN x1 )    copy element N
+put ( x1 ... xN y N -- y x2 ... xN )    replace element N
+                                          [N rotate pop -(N-1) rotate]
+rot ( x1 x2 x3 -- x2 x3 x1 )            rotate top three elements [3 rotate]
+rotate ( x1 ... xN N -- x2 ... xN x1 )  rotate N elements
+roll ( xN ... x1 N M -- xM ... x1 xN ... xM-1 ) See man roll for more info
+depth ( -- i )*                         returns the depth of the stack
+pstack ( i -- ) && pstack ( i s -- )    See man pstack for more info
+abort ( s -- )                          Abort the program with string s
+checkargs (??? s -- )                   See man checkargs for more info
+&&& string
+String operations:
+stringcmp ( s s -- i )                  compare strings, ignoring case
+stringncmp ( s s i -- i )               compares n characters of two strings,
+                                          ignoring case
+strcmp ( s s -- i )                     compare strings
+stringpfx (s s2 -- i)*                  0 if s2 is a prefix of s.
+wstrcmp ( s1 s2 -- i )*                 See man wstrcmp for more info 
+strncmp ( s s i -- i )                  compare n characters of two strings
+strcut ( s i -- s s )                   cut string after character i
+smatch ( s s -- i )*                    See man smatch for more info
+strlen ( s -- i )                       return length of string
+strcat ( s s -- s )                     concatenate two strings
+explode ( s s -- s1 ... sN N )          explode 1 wherever 2 is
+subst ( s s s -- s )                    substitute 3 with 2 in 1
+instr ( s s -- i )                      return loc of first occurance of
+                                          2 in 1
+rinstr ( s s -- i )                     return loc of last occurance of 2 in 1
+instring ( s s1 -- i )                  See man instring for more info
+rinstring ( s s1 -- i )                 See man rinstring for more info
+pronoun_sub ( d s -- s )                use pronoun substitution
+toupper ( s -- s )*                     Map string to all uppercase
+tolower ( s -- s )*                     Map string to all lowercase
+caps    ( s -- s )*                     Map string - first char upper, all
+                                         else lower
+mushfunctions ( s -- s )*               parse up a string MUSH style
+striplead (s -- s)              Strips leading spaces from the given string.
+striptail (s -- s)              Strips trailing spaces from the given string.
+strip (s -- s)                  This is a built in $define.  
+                                It is interpreted as "striplead striptail"
+&&& conversions
+Conversion functions:
+atoi ( s -- i )                         convert string to int
+atof ( s -- f )                         convert string to float
+intostr ( x -- s )                      convert into string
+dbref ( x -- d )                        convert into dbref
+float ( x -- f )                        convert into float
+int ( x -- i )                          convert into int
+variable ( x -- v )                     convert into variable
+str ( x -- s )*                         convert into string
+&&& property
+Property operations:
+getpropval ( d s -- i )                 get property value
+getpropstr ( d s -- s )                 get property string
+remove_prop ( d s -- )                  remove a property
+addprop ( d s s i -- )                  add a property 2 to 1 with string
+                                          of 3 or a value of 4 if 3 is ""
+setprop ( d s s -- )*                   add/set a property 2 to 3 on obj 1
+nextprop ( d s -- s )*                  find next property
+perms ( d s -- i )*                     find permissions on property
+                                          [see "help permissions" for values]
+setperms ( d s i -- )*                  sets permissions on property
+nextprop? ( d s -- i )*                 returns if there is a property that
+                                          is next
+propdir? ( d s -- i )*                  Is s1 a propdir on d1?
+name ( d -- s )                         return the frist name of a dbref
+fullname ( d -- s )                     return all names of a dbref
+                                          [for more info see 'help compound']
+desc ( d -- s )                         return description of a dbref
+succ ( d -- s )                         return success of a dbref
+fail ( d -- s )                         return fail of a dbref
+drop ( d -- s )                         return drop of a dbref
+osucc ( d -- s )                        return osuccess of a dbref
+ofail ( d -- s )                        return ofail of a dbref
+odrop ( d -- s )                        return odrop of a dbref
+setname ( d s -- )                      set name of a dbref
+setdesc ( d s -- )                      set description of a dbref
+setsucc ( d s -- )                      set success of a dbref
+setfail ( d s -- )                      set fail of a dbref
+setdrop ( d s -- )                      set drop of a dbref
+setosucc ( d s -- )                     set osuccess of a dbref
+setofail ( d s -- )                     set ofail of a dbref
+setodrop ( d s -- )                     set odrop of a dbref
+pennies ( d -- i )                      return pennies of a dbref
+addpennies ( d i -- )                   add 2 pennies to 1
+&&& nextprop
+NEXTPROP ( d s -- s )
+Finds next property on a given object.  If given "" it finds the first
+property.  If the string has a trailing "/" it will traverse into the propdir.
+
+For example:
+properties->
+        this:true
+        this/that:false
+        this/these:whatever
+        those:0
+
+"" nextprop would result in "this", "this/" nextprop would result in
+"this/that"..."this" nextprop would result in "those".  If there are no more
+properties, "" is returned.
+&&& nextprop?
+NEXTPROP? ( d s -- i )
+Returns if there is another property in the same propdir, or if the
+string ends in '/' it returns if the property has any sub-properties.
+&&& db
+DB operations:
+db_top ( -- i )*                        integer = highest element in db + 1
+dbtop ( -- d )*                         highest dbref in db
+moveto ( d d -- )                       move object 1 to 2
+contents ( d -- d )                     returns first content of dbref
+exits ( d -- d )                        returns first exit of dbref
+next ( d -- d )                         find next of contents or exits
+match ( s -- d )                        match string in current location
+rmatch ( d s -- d )                     match string in remote location
+part_pmatch (s -- d)*                   See man part_pmatch for more info
+copyobj ( d -- d )                      returns dbref of copy of thing
+location ( d -- d )                     returns the location of a dbref
+owner ( d -- d )                        returns owner of a dbref
+owner ( i -- d )                        returns owner of a frame
+getlink ( d -- d )                      returns link of a dbref
+dig ( s d -- d d )*                     create a room named 1 with parent 2
+                                          returns the room dbref as 1
+                                          and parent as 2
+open ( s d -- d )*                      open an exit attached to 2, returns
+                                          the dbref of the new exit
+online ( -- d1 ... dN N )*              returns a list of players
+chown ( d d -- )*                       changes ownership of 1 to 2
+recycle ( d -- )*                       recycles an object
+create ( s i -- d )*                    creates a new object
+unlink ( d -- )*                        unlink an exit/object
+addlink ( d d -- )*                     links object 1 to object 2
+linkcount ( d -- i )*                   find the number of links on an object
+getlinks ( d -- d1...dN N )*            returns all the links on an object
+trig ( -- d )*                          returns the dbref of the trigger
+prog ( -- d )*                          returns the dbref of the current program
+callers ( -- d1...dN N )*               returns a list of callers
+backlinks ( d -- d1...dN N )*           returns a list of objects linked to obj
+backlocks ( d -- d1...dN N )*           returns a list of objects locked to obj
+nextowned ( d -- d' )*                  returns the next in an owned list
+unparse_flags ( d -- s )*               returns verbose flags i.e. "Player"
+unparseobj ( d -- s )*                  returns a verbose player line
+flagstr ( d -- s )*                     returns short flags i.e. "PWAJ"
+lock ( d s -- )*                        sets the key on d
+unlock ( d -- )*                        unlocks a dbref
+dump ( -- )* [wizard]                   dumps the database
+shutdown ( -- )* [wizard]               shuts game down
+&&& interaction
+Player interaction:
+read ( -- s )                           reads in a string
+notify ( d s -- )                       notify one player
+notify_except ( d d s -- )              notify all but 2 in room 1
+force ( d s -- )*                       forces an object to do an action
+&&& stamp
+Timestamp stuff:
+touch ( d i -- )*                       update used timestamp
+touch_created ( d i -- )* [wizard]      update created timestamp
+touch_modified ( d i -- )* [wizard]     update modified timestamp
+time_created ( d -- i )*                find time dbref was created
+time_modified ( d -- i )*               find time dbref was modified
+time_used ( d -- i )*                   find time dbref was used
+&&& time
+Time stuff:
+systime ( -- i )*                       returns current time, in seconds from 
+                                          Jan 1, 1970
+time ( -- s m h )*                      returns time on server
+date ( -- d m y )*                      returns date on server
+ctime ( i -- s )*                       convert system time format to string
+gmtoffset ( -- i)*                      offset from GMT in seconds.
+timesplit ( -- 8i )*                    Puts 8 time ints on the stack 
+gmtsplit ( -- 8i )*                     Puts 8 GMT time ints on the stack 
+strftime (s i -- s)*                    See man strftime for more info
+&&& descriptor
+Descriptor stuff:
+concount ( -- i )*                      the number of connections to the MUCK,
+connections ( -- i1...iN N )*           returns a list of descriptor #'s
+connectors ( d -- i1...iN N)*           returns a list of descriptors for d
+conidle ( i -- i )*                     returns the idle time in seconds
+conlast ( d -- i )*                     return the most RECENT descriptor for d
+contime ( i -- i )*                     returns the connection time in minutes
+conhost ( i -- s )*                     returns the host connected from
+condbref ( i -- d )*                    returns the dbref of a connection, if
+                                          not connected:#-1
+connotify ( i s -- )*                   notifies a connection
+conboot ( i -- )*                       disconnects a descriptor
+connected? ( i -- i )*                   is the descriptor connected?
+&&& system
+ilimit ( -- i )*                        returns the iteration count limit
+setilimit ( i -- )* [wizard]            sets the iteration count limit
+&&& files
+MUF Text files and manipulation
+spitfile ( s -- )*         dumps the entire contents of file s to the user
+touchfile ( s -- i )*      returns 1 if s exists, 0 otherwise
+notifyfile ( d d s -- )*   dumps the entire contents of file s to d1 except d2
+&&& processes
+go ( i -- )*	  	 	Force a process to execute
+kill ( i -- )*		 	Kill a process
+pid ( i -- i) *                 Return the pid of the current process
+isapid? ( i -- i )*             Does i1 exist as a frame?
+processes ( -- i1...iN N )*	Return a listing of running processes & count
+sleeptime ( i -- i )*		Get the sleeptime for a process, 0 if in READ
+piddbref ( i -- d )*		Return the dbref of the program running 
+foreground ( -- )* [wizard]     Run program until completion
+background ( -- )*              Swap program out for one time slice
+&&& wstrcmp
+wstrcmp ( s1 s2 -- i )*     compare s1 to s2 where s2 can contain any number
+                            of "*"  or "?" characters for wildcard matching.  
+                            * is for whole strings and ? is for single chars
+                            The special meaning of "*" and "?" can be escaped 
+                            by using a "\*" or "\?".  s1 and s2 can not be 
+                            null strings.
+! ( x v -- )
+Sets a variable.  The value on top of the stack must be a variable; the
+value below can be any MUF object.  The variable's value is set to the
+object.
+&&& %
+% ( i1 i2 -- i )
+Returns i1 % i2, unless i2 is zero, in which case zero is returned.
+This uses the C % operator, so the same caveats apply: if both
+arguments are positive, the result is the mathematical modulus, but if
+either of the arguments is negative, the result may be negative.  Its
+absolute value will be less than that of i2, and it will always be the
+case that, given two integers on the stack, with the top one non-zero,
+
+        over over % 3 pick 3 pick / rot * + =
+
+will always return 1.  (For those who know C, this corresponds to the C
+identity ((a/b)*b)+(a%b) == a, for b != 0.)
+&&& &
+& ( i1 i2 -- i )
+Returns the bitwise AND of its operands.
+&&& *
+* ( i1 i2 -- i )
+Multiplies its arguments and returns the product.
+&&& +
++ ( i1 i2 -- i )
+Adds its arguments and returns the sum.
+&&& ++
+++ ( v -- )
+Increments the value of the variable; the value must be a number or
+dbref (or a run-time error occurs).
+&&& -
+- ( i1 i2 -- i )
+Subtracts i2 from i1, returning the difference.
+&&& --
+-- ( v -- )
+Decrements the value of the variable; the value must be a number or
+dbref (or a run-time error occurs).
+&&& /
+/ ( i1 i2 -- i )
+Divides i1 by i2, returning the quotient, unless i2 is zero, in which
+case 0 is returned.  In the presence of negative operands, the rounding
+direction is not guaranteed; see the % operator for more information.
+&&& :
+: word
+This begins the definition of a word.  The definition extends until the
+following ;.  Note that, unlike real FORTH, : and ; cannot be embedded
+in the definition of a word; also, the body of a word cannot be empty.
+&&& ;
+;
+Ends a definition begun with :.  See : for more information.
+&&& <
+< ( i1 i2 -- i )
+Returns 1 if i1 is less than i2, 0 otherwise.
+&&& <<
+<< ( i1 i2 -- i )
+Returns i1 left-shifted i2 bits.  Unlike the C operator, if i2 is
+negative, this shifts right instead.  However, like C, if the magnitude
+of i2 is greater than or equal to the number of bits used to represent
+an integer, the result is undefined.
+&&& <=
+<= ( i1 i2 -- i )
+Returns 1 if i1 is less than or equal to i2, 0 otherwise.
+&&& =
+= ( i1 i2 -- i )
+Returns 1 if i1 is equal to i2, 0 otherwise.
+&&& >
+> ( i1 i2 -- i )
+Returns 1 if i1 is greater than i2, 0 otherwise.
+&&& >=
+>= ( i1 i2 -- i )
+Returns 1 if i1 is greater than or equal to i2, 0 otherwise.
+&&& >>
+>> ( i1 i2 -- i )
+Returns i1 right-shifted i2 bits.  Unlike the C operator, if i2 is
+negative, this shifts left instead.  However, like C, if the magnitude
+of i2 is greater than or equal to the number of bits used to represent
+an integer, the result is undefined.
+&&& @
+@ ( v -- x )
+Fetches the value of a variable.  The top element of the stack must be
+a variable; its value is fetched and replaces the variable on top of
+the stack.
+&&& addlink
+addlink ( d1 d2 -- )
+Links d1 to d2, much like the @link game command.  The program must be
+able to build.  If d1 is an exit, then except for wizard programs, it
+must be owned by the effective player, unless it has no links
+currently, and in any case the effective player is charged for the
+link.  If d1 is is a player, thing, or room, then except for wizard
+programs, the effective player must control d1, and it must be possible
+for the effective player (or for wizard programs, d2's owner) to
+perform the link.  Programs are not acceptable as d1.
+&&& addpennies
+addpennies ( d i -- )
+Gives i dollars to d.  Works only for wizard programs.  d may be a
+player or a thing; i may be positive or negative.  Things may not have
+their money supply reduced below 1; players' money supply is
+unrestricted.
+&&& addprop
+addprop ( d s1 s2 i -- )
+Adds property s1 to thing d with a value of i and a string of s2.  Any
+previous property with the same name is replaced.
+&&& and
+and ( x1 x2 -- i )
+Logical AND.  The result is 1 if neither argument is false and 0
+otherwise (see `man logic').
+&&& atoi
+atoi ( s -- i )
+Converts a string to an integer.  If the string doesn't look like a
+number, the result will be 0.
+&&& awake?
+awake? ( d -- i )
+Given the dbref of a player, this returns the number of times that
+player is connected.  If given a non-player, it will always return 0.
+&&& backlinks
+backlinks ( d -- d1 d2 ... dN N )
+Given an object, this returns a list of the objects which are linked to
+it.
+&&& backlocks
+backlocks ( d -- d1 d2 ... dN N )
+Given an object, this returns a list of the objects which are locked
+and whose locks involve it.
+&&& begin
+This marks the beginning of a `while' loop construct.  See `man while'.
+&&& break
+break ( -- )
+break causes an immediate unconditional exit from the smallest
+enclosing do, for, or begin-while loop (see `man do', `man for', and
+`man while').  Control passes immediately to a point just after the
+closing "loop".
+&&& call
+call ( d -- ? )
+Call hands execution over to a program specified by the dbref on the
+top of the stack.  You either have to own the program being called or
+it has to have its L flag set.  Be aware that when the program called
+finishes, it returns control to the caller, and the stack will be in
+the state that the called program left it in.
+&&& caller
+caller ( -- d )
+Returns the player that called the first program in the chain of calls
+that eventually led to this program being executed.
+&&& callers
+callers ( -- d1 d2 ... dN N )
+This returns a rudimentary stack trace.  The list pushed onto the stack
+is a trace of the chain of calls by which control arrived in the
+program being executed: dN called dN-1 which called ... which called d2
+which called d1 which called the program being executed.
+&&& caps
+caps ( s -- s )
+Uppercases the first character of the string, lowercases the rest.
+&&& chown
+chown ( d1 d2 -- )
+Changes ownership of d1 to d2.
+&&& conboot
+conboot ( i -- ) [wizard]
+Boots a specific connection.  This is the only way to forcibly
+disconnect only one connection of a player who is connected multiple
+times.
+&&& concount
+concount ( -- n )
+Returns the number of connections to the muck.  This includes
+connections that have not yet issued a `connect' command to connect to
+a character.
+&&& condbref
+condbref ( i -- d )
+Returns the dbref of the player connected on the specified connection.
+If the connection has not yet connected to a character, #-1 is
+returned.
+&&& conhost
+conhost ( i -- s ) [wizard]
+Returns the name of the host from which the specified connection was
+made.
+&&& conidle
+conidle ( i -- i )
+Returns the idle time for a connection, measured in seconds.
+&&& connections
+connections ( -- d1 d2 ... dN N )
+Returns a list of all connected descriptors.
+&&& connotify
+connotify ( i s -- ) [wizard]
+Writes the string to the connection.
+&&& contents
+contents ( d -- d )
+Returns the first thing contained in a dbref.  `next' should be used to
+step through the list of contents.  Note that moving things into or out
+of the containing thing can invalidate this list; care is called for.
+&&& contime
+contime ( i -- i )
+Returns the time since the descriptor was connected, in seconds.
+&&& continue
+continue ( -- )
+continue causes the current iteration of the smallest enclosing do,
+for, or begin-while loop (see `man do', `man for', and `man while') to
+end and the next to begin.  Thus, it's equivalent to braching to a
+point immediately before the closing "loop".
+&&& copyobj
+copyobj ( d -- d )
+Clones the thing and returns the copy.  Works only for objects, not
+players, rooms, exits, etc.  In most respects, the copy is identical to
+the original; it differs only in that it has a different dbref number
+(of course) and that it has no actions attached to it.  All other
+fields - property list, description, etc - are copied.  The program
+must be able to build; except for wizard programs, the effective player
+is charged for the copy.  The copy is owned by the same player as the
+original and is placed in the effective player's inventory.
+&&& create
+create ( s i -- d )
+Creates an object with the string as its name and the number as its
+cost.  The new object is owned by the effective player and is placed in
+that person's inventory.  The program must be able to build, and except
+for wizard programs, the effective player is charged for the object.
+&&& ctime
+ctime ( i -- s )
+Convert a time value, such as is returned by systime, to a
+human-readable string.  (For those who know C, this is done with
+asctime(localtime(...)), with the trailing newline removed.)
+&&& db_top
+db_top ( -- i )
+Returns the lowest dbref number that does not exist at all (that is,
+one more than the highest dbref that does exist).  The returned value
+is an integer; see `man dbtop'.
+&&& dbcmp
+dbcmp ( d1 d2 -- i )
+Returns true if d1 and d2 are identical (both must be dbrefs).  Neither
+one need be a valid dbref.  Note that unlike strcmp, this returns true
+if the dbrefs are equal.
+&&& dbref
+dbref ( i -- d )
+Converts an integer to the corresponding dbref.  No checks are made; if
+the integer is out of range, the result will not be a valid dbref.
+&&& dbref?
+dbref? ( x -- i )
+Returns true if the thing is a dbref (room, player, object, etc), false
+if it's anything else (integer, string, etc).
+&&& dbtop
+dbtop ( -- d )
+Returns the highest valid dbref.  Identical to `db_top 1 - dbref'
+(except that it doesn't need an extra space on the stack, compiles to
+one instruction instead of 4, and is correspondingly faster).
+&&& depth
+depth ( -- i )
+Returns the number of things on the stack.  (The number returned is the
+count of things on the stack *before* the result is pushed; thus, the
+smallest possible returned value is 0, not 1.)
+&&& desc
+desc ( d -- s )
+Returns the description string of a dbref.
+&&& dig
+dig ( s dp -- dr dp )
+Digs a new room with name s and parent room dp; the new room (dr) is
+pushed on the stack and then the parent is pushed as well.  (I'm not
+sure why the parent is pushed back on.)  The program must be able to
+build, the effective player must be able to link rooms to the parent,
+and except for wizard programs, the effective player is charged for the
+room.  The new room inherits its J flag setting from the effective
+player's J flag setting.
+&&& do
+do ( -- ) loop ( -- )
+format: do <block> loop
+
+do repeats body between the do and the loop indefinitely.  This loop
+can be broken only by an exit or break within it, an interpreter error,
+or by killing the frame.
+
+See also `man break' and `man continue'.
+&&& drop
+drop ( d -- s )
+Returns the drop message of a dbref.
+&&& dup
+dup ( x -- x x )
+Duplicates the top element of the stack.
+&&& else
+See `man if'.
+&&& exit
+exit ( -- )
+Exits from the word it appears in, returning to whatever called that
+word.
+&&& exit?
+exit? ( x -- i )
+Returns true if the argument is an exit dbref; otherwise (if the
+argument is not a dbref, or is some other kind of dbref), returns
+false.
+&&& exits
+exits ( d -- d )
+Returns the first exit of a dbref.  The `next' primitive can be used to
+step through the list.
+&&& explode
+explode ( sA sB -- sN ... s1 N )
+Breaks sA into pieces, with occurrences of sB being the boundaries.
+Pushes the piecs and the number of pieces.  Note that multiple
+consecutive occurrences of sB will produce empty strings in the
+resulting list.  As a special case, if sB is "", sA is broken into
+single-character strings.  The pieces are pushed in reverse order.
+
+Some examples:
+
+        "this is a test" " " explode => "test" "a" "is" "this" 4
+        "foo  bar" " " explode => "bar" "" "foo" 3
+        "a$b@c$@d$e@f" "$@" explode => "d$e@f" "a$b@c" 2
+        "this is a test" "xx" explode => "this is a test" 1
+        "hello" "" explode => "o" "l" "l" "e" "h" 5
+&&& fail
+fail ( d -- s )
+Returns the fail message for a dbref.
+&&& flag?
+flag? ( d s -- i )
+The second argument must be a valid flag name or abbreviation.  The
+flag? primitive returns true if the flag is set on the dbref, false
+otherwise.
+&&& flagstr
+flagstr ( d -- s )
+Returns the short flag string for a dbref, with each flag represented
+by a single character (eg, Pmb or Rnjhv).
+&&& for
+for ( i i i -- i )
+format: for <<block>> loop
+
+The parameters to the for primitive are: the starting number, the
+ending number, and the size of the step [size of 0 will result in an
+endless loop].  The for primitive pushes the current value onto the
+stack and then executes the block of code.  The body is always run at
+least once, even if the arguments would seem to imply otherwise.
+
+For example, `1 4 1 for dup loop' will push the same numbers on the stack
+that `1 1 2 2 3 3 4 4' would.
+
+See also `man break' and `man continue'.
+&&& force
+force ( d s -- )
+This causes the string to be executed as a command, as if the object had typed 
+it.  This does not work for QUIT, OUTPUTPREFIX, or OUTPUTSUFFIX.  Except for 
+wizard programs, the player running the program, the player who owns the 
+program, and the player being forced must all be the same.
+&&& getlink
+getlink ( d -- d )
+Returns the thing a dbref is linked to.  If the argument is an exit
+that is linked to more than one thing, only the first thing is
+returned; use getlinks if you need to access the others.
+&&& getlinks
+getlinks ( d -- d1 d2 ... dN N )
+Returns all the things a dbref is linked to.  If the argument is a
+room, thing, or player, the list consists of its drop-to or home (as
+appropriate), unless it's #-1, in which case the list is empty.  If the
+argument is an exit, the list consists of all things the exit is linked
+to.  If the argument is anything else, the list is empty.
+&&& getpropstr
+getpropstr ( d s -- s )
+Fetches a property string.  The first argument is the dbref whose
+property list is to be accessed; the second is a string naming the
+property.  The result is the string value of the property, or "" if the
+property is not set.
+&&& getpropval
+getpropval ( d s -- i )
+Fetches a property value.  The first argument is the dbref whose
+property list is to be accessed; the second is a string naming the
+property.  The result is the integer value of the property, or 0 if the
+property is not set.
+&&& if
+if ( i -- )
+basic format:
+<condition> if <block> [else <block>] then
+
+The if command will execute the block between it and the then (or the
+else, if present) if the value on the top of the stack is true.  If the
+value is false, it will execute the block between the else and the
+then, if any.  The test value is popped from the stack before either
+block is executed.  (See `man logic' for the definitions of true and
+false.)  An additional primitive, eif, is available, which functions as
+an "else if" conditional: the code between the else and the eif is
+executed, and if the top of the stack is true, the block after the eif
+is executed, otherwise control passes to the next else:
+
+<cond> if <block> else <cond> eif <block> else .... then
+
+This is equivalent to
+
+<cond> if <block> else <cond> if <block> else .... then then
+
+except that only one then is needed to close the whole structure.
+&&& ilimit
+ilimit ( -- i )
+Returns the iteration count limit.  If a program attempts to execute
+more than this many iterations, a fatal error will be generated.
+&&& instr
+instr ( s1 s2 -- i )
+Finds s2 within s1, returning the offset of the first such occurrence,
+or 0 if s2 does not occur within s1.  (The returned offset is 1-origin,
+that is, if s2 occurs at the very beginning of s1, the returned value
+is 1.)
+&&& int
+int ( d -- i )
+Converts a dbref to its integer index in the database.  (This actually
+works for variables as well, returning the variable number, though MUF
+variables are of questionable utility in any case.)
+&&& int?
+int? ( x -- i )
+Returns 1 if its argument is an integer, 0 otherwise.
+&&& intostr
+intostr ( i -- s )
+Converts an integer to a string.  This is the converse of atoi.
+&&& linkcount
+linkcount ( d -- i )
+Returns the link count of a dbref.  For players, always returns 1; for
+programs it always returns 0.  For objects, returns 1 if the object has a 
+home, otherwise 0; for rooms, returns 1 if the room  as a drop-to, otherwise 
+0.  For exits, returns the number of things the exit is linked to.
+&&& location
+location ( d -- d )
+Returns a thing's location.  For players, objects, and programs, this
+is the room the thing is in; for rooms, it is the room's parent.  For
+exits, it is the thing the exit is attached to.  
+&&& lock
+lock ( d s -- )
+Locks a dbref.  s is a string giving the lock expression.  If s is "",
+the dbref is unlocked.  (unlock can also be used to unlock a dbref.)
+&&& locked?
+locked? ( d -- i )
+Returns true if the dbref is locked, false if it's unlocked.
+&&& lockstr
+lockstr ( d -- s )
+Returns the lock of the dbref as a string.  If the dbref is not locked,
+"" is returned.  The resulting string is acceptable to the lock
+primitive, but is generally not appropriate for human interaction.  See
+also unparse_lock.
+&&& loop
+loop terminates a for, while, or do loop.  See `man for', `man while',
+and `man do'.
+&&& match
+match ( s -- d )
+Matches a string, returning the dbref of the matched thing.  If the
+match fails, #-1 is returned; if the match is ambiguous, #-2 is
+returned.  (#-3 is returned if the string is "home".)
+&&& moveto
+moveto ( d1 d2 -- )
+Moves d1 to location d2.  Unfortunately this is fairly restrictive;
+several restrictions apply.  They are rather complicated and the
+details vary depending on the type of thing being moved.  In all cases,
+though, the thing being moved must either be set J(ump_OK) or be owned
+by the effective player running the program (exception: wizard programs
+are free from this restriction).  To see the other restrictions, ask
+for `man moveto-<type>', where <type> is the type of the thing being
+moved: player, thing, room, or exit (programs are treated as things for
+the purposes of moveto).  (Eg, `man moveto-player' to see the
+restrictions that apply when moving a player with moveto.) To send a player 
+or thing to its home, #-3 can be given as the destination.
+&&& name
+name ( d -- s )
+Returns a dbref's name.
+&&& next
+next ( d -- d )
+If the dbref is an exit, returns the next exit in the internal list of
+exits attached to the object the exit is attached to.  If the dbref is
+some other type, returns the next object in the list of contents in the
+object's containing object. This is intended to be used to step down a list 
+obtained with the contents, or exits primitive.  #-1 is returned to indicate 
+the end of the list.
+&&& nextowned
+nextowned ( d -- d )
+Returns the next object in the internal list of objects owned by the
+owner of the specified object.  This is intended to be used to step
+down the list of everything owned by a player.  (The proper way to
+start such a loop is to use the player itself as the beginning of the
+list.)  #-1 is returned to indicate the end of the list.
+&&& not
+not ( x -- i )
+Returns 1 if its argument is false, 0 if its argument is true.  (See
+`man logic' for a description of what is considered false and true.)
+&&& notify
+notify ( d s -- )
+Sends the string to the dbref.  If the dbref is a player, the string is
+sent to all of that player's connections.  If the dbref is a player or
+thing, all hear exits attached to it are activated.  If the dbref is of
+any other type, nothing happens.
+&&& notify_except
+notify_except ( d1 d2 s -- )
+Sends the string to everything contained in d1, which must be a room,
+except that if d2 is one of the things contained in d1, it does not get
+notified.  (Notification is done as if with the notify primitive.)  In
+addition, any hear exits attached to d1 or any of its ancestors are
+activated.  Any hear exits attached to the player running the program
+are also activated, [may be the effective player, but I think not].
+&&& number?
+number? ( s -- i )
+Returns 1 if the argument is a string which contains a valid number, 0
+if the argument is not a string or doesn't look like a number.
+&&& numowned
+numowned ( d -- i )
+Returns the number of dbrefs owned by the player who owns the argument
+dbref.  Wizard programs may use this with any dbref; for other
+programs, the player whose ownership count is to be computed must be
+the player running the program.
+&&& odrop
+odrop ( d -- s )
+Returns the odrop message on the argument dbref, or "" if the dbref has
+no odrop message.
+&&& ofail
+ofail ( d -- s )
+Returns the ofail message on the argument dbref, or "" if the dbref has
+no ofail message.
+&&& ok?
+ok? ( d -- i )
+Returns true if the dbref is a valid object: its number is not less
+than 0 or larger than the current size of the database, and is not a
+garbage object.
+&&& online
+online ( -- d1 ... dN N )
+Returns a list of players online.  Players connected more than once
+appear in the list more than once.  The list is in the order it happens
+to be kept in internally, which is not useful for much.
+&&& open
+open ( s d -- d )
+Opens a new exit with the specified name, attached to the specified
+dbref.  The new exit's dbref is left on the stack.  The new exit is
+owned by the effective player, but is not linked (note that linking an
+unlinked exit affects its owner).  The program must be able to build,
+and except for wizard programs, the effective player (a) must own the
+argument dbref and (b) is charged for the exit.
+&&& or
+or ( x x -- i )
+Returns 1 if either of its arguments is true, otherwise 0.  (See
+`man logic' for a description of what is considered true and false.)
+&&& osucc
+osucc ( d -- s )
+Returns the osuccess message on the argument dbref, or "" if the dbref
+has no osuccess message.
+&&& over
+over ( x1 x2 -- x1 x2 x1 )
+Duplicates the next-to-topmost thing on the stack, pushing it on top,
+over the topmost thing.
+&&& owner
+owner ( d -- d )
+Returns the dbref of a dbref's owner.
+&&& passlock?
+passlock? ( d1 d2 -- i )
+Returns 1 if d1 passes the lock on d2, otherwise 0.  If d2 is not
+locked, this will always return 1.
+&&& pennies
+pennies ( d -- i )
+Returns the amount of money of a dbref.  The argument must be a player
+or thing.
+&&& pick
+pick ( d1 ... dN N -- d1 ... dN d1 )
+Copies the Nth item down on the stack, pushing the copy on top of the
+stack.  Thus, 1 pick is equivalent to dup and 2 pick is equivalent to
+over.
+&&& player?
+player? ( x -- i )
+Returns true if the argument is a dbref that refers to a player, 0 if
+it's not a dbref or is some other type of dbref.
+&&& pop
+pop ( x -- )
+Pops the top element off the stack and throws it away.
+&&& prog
+prog ( -- d )
+Returns the dbref of the program the call occurs in.
+&&& program?
+program? ( x -- i )
+Returns true if the argument is a dbref that refers to a program, 0 if
+it's not a dbref or is some other type of dbref.
+&&& pronoun_sub
+pronoun_sub ( d s -- s )
+Performs pronoun substitution on the string, using the dbref as the
+source of replacement strings.  Pronoun substitution is done with %
+signs in the string.  When a % occurs, the following character
+determines what the pair is replaced with.  In each case, the sex:
+property on the dbref also affects the result, and in some cases the
+dbref's name (which is assumed to be "Name" in the table below).
+First, the % and the following character are taken as a two-character
+property name which is looked for on the dbref.  If it's found, the
+property string value is used as the replacement string.  Otherwise,
+the following table describes the replacement string.
+
+        sex:male        sex:female      sex:neuter      other
+
+%a      his             hers            its             Name's
+%s      he              she             it              Name
+%o      him             her             it              Name
+%p      his             her             its             Name's
+%r      himself         herself         itself          Name
+%n      Name            Name            Name            Name
+
+If the character after the % is uppercase, the first character of the
+replacement string is uppercased, except when the replacement comes
+from the "other" column of the table; in that case, the initial
+character is left alone.  (I don't know why this is, particularly when
+the %n row and properties get the capitalization.)
+
+If the sequence is not one given in the table and no property is found,
+the % is dropped and the following character retained as the
+replacement.
+&&& put
+put ( x1 ... xN y N -- y x2 ... xN )
+This simply replaces the Nth element down on the stack, rather like an
+assignment, with the stack treated as an array.
+&&& random
+random ( -- i )
+This returns a random positive integer, from 0 through the largest
+positive integer the muck can represent.  Normally this is followed
+with a % operation to reduce the range of the number to something
+manageable.
+&&& read
+read ( -- s )
+Returns a string read from the player.  The program must be being run
+from a foreground frame , or an error is generated.  The program stops running 
+and waits until the player types a line of input.  This line of input is 
+pushed on the stack as a string, and the program resumes execution at the 
+point just after the read call.  (Currently, this does not work in a program 
+being run as part of testing a lock.)
+&&& recycle
+recycle ( d -- )
+Recycles the dbref, like the @recycle command.  The object must be
+owned by the effective player, even for wizard programs.  The object
+also must not be the program the recycle call appears in, nor any of
+the programs in its chain of callers.  You also can't recycle the
+global environment or player start rooms, or player, or garbage object.
+&&& remove_prop
+remove_prop ( d s -- )
+Removes the specified property from the specified dbref.  If a property
+with the specified name existed, it is removed; otherwise, nothing
+happens.
+&&& rinstr
+rinstr ( s1 s2 -- i )
+Finds s2 within s1, returning the offset of the last such occurrence,
+or 0 if s2 does not occur within s1.  (The returned offset is 1-origin,
+so that, for example, if s2 occurs only at the very beginning of s1,
+the returned value is 1.)
+&&& rmatch
+rmatch ( d s -- d )
+Matches the string in the context of the dbref, returning the result of
+the match.  The dbref must be a player, room, or thing; in any case,
+the string is matched against the exits attached to the dbref, and in
+the case of a player or room, against the inventory or contents as
+well.  Unfortunately "here" and "me" and "home" don't work; also, if
+the dbref is a player, the player's location and its parent rooms are
+not searched.
+&&& room?
+room? ( x -- i )
+Returns 1 if the argument is dbref that refers to a room, or is #-3.
+Otherwise 0 is returned.
+&&& rot
+rot ( x1 x2 x3 -- x2 x3 x1 )
+Rotates the top three elements of the stack.  This is equivalent to
+`3 rotate'.
+&&& rotate
+rotate ( x1 x2 ... xN N -- x2 ... xN x1 )
+       ( x1 ... xN-1 xN -N -- xN x1 ... xN-1 )
+Rotates the top N elements of the stack.  If the argument is positive,
+pulls an element from N elements down on the stack and puts it on top;
+with a negative argument, performs the converse operation, moving the
+top element to a lower place on the stack.  Thus, 3 rotate is identical
+in effect to rot, and 2 rotate (or -2 rotate) is identical in effect to
+swap.
+&&& set
+set ( d s -- )
+Sets or clears a flag on a dbref.  The string must be one of the valid
+flag names, or such a name with a ! prefixed to it.  (Abbreviations are
+accepted.)  This sets the flag, or with the ! prefix, clears it, on the
+dbref.  Except for wizard programs, the effective player must own the
+dbref.  Some flags cannot be set or cleared from MUF at all; as of this
+writing, they are Wizard, Mucker, Visual, Unseen, Quell, and God.  In
+addition, non-wizard programs are not allowed to set or clear the Dark
+bit on anything but a room or program.
+&&& setdesc
+setdesc ( d s -- )
+Sets the description string for the dbref.  Except for wizard programs,
+the effective player must own the dbref.
+&&& setdrop
+setdrop ( d s -- )
+Sets the drop message for the dbref.  Except for wizard programs, the
+effective player must own the dbref.
+&&& setfail
+setfail ( d s -- )
+Sets the fail message for the dbref.  Except for wizard programs, the
+effective player must own the dbref.
+&&& setilimit
+setilimit ( i -- ) [wizard]
+Sets the iteration limit.  If a MUF program attempts to run for more
+than this many cycles, it will be aborted with an error.  Note that if the 
+program does a sleep, the count of iterations it has used is reset to zero.
+&&& setname
+setname ( d s -- )
+Sets the name of the dbref.  Except for wizard programs, the effective
+player must own the dbref.  Only wizard programs are allowed to use
+this when the dbref is a player.
+&&& setodrop
+setodrop ( d s -- )
+Sets the odrop message for the dbref.  Except for wizard programs, the
+effective player must own the dbref.
+&&& setofail
+setofail ( d s -- )
+Sets the ofail message for the dbref.  Except for wizard programs, the
+effective player must own the dbref.
+&&& setosucc
+setosucc ( d s -- )
+Sets the osuccess message for the dbref.  Except for wizard programs,
+the effective player must own the dbref.
+&&& setsucc
+setsucc ( d s -- )
+Sets the success message for the dbref.  Except for wizard programs,
+the effective player must own the dbref.
+&&& sleep
+sleep ( i -- )
+Sleep with an integer argument causes the current program to sleep for
+i seconds.  
+
+Technical information:  When a player starts a program and that program
+does a sleep call, the frame [see @ps, @kill for more info] is freed
+from the player and  will continue executing at the designated time.  If
+the program does another sleep, it will extend the life of the frame.
+
+An example program:
+  : main do me @ "test" notify 60 sleep loop ;
+
+This will run an endless loop that notifies you every 60 seconds with
+the "test" message.  To stop the program use @kill on the pid of the frame.
+&&& strcat
+strcat ( s1 s2 -- s )
+Concatenates two strings, returning the result.  For example,
+`"foo" "bar" strcat' will leave the string "foobar" on top of the
+stack.
+&&& strcmp
+strcmp ( s1 s2 -- i )
+Compares two strings, returning an integer that is less than, equal to,
+or greater than zero, as s1 is less than, equal to, or greater than s2.
+Upper/lower case distinctions are significant, and machine character
+values are used to determine what constitutes less than or greater
+than.
+&&& strcut
+strcut ( s i -- s1 s2 )
+Cuts a string.  i must not be less than zero.  If i is larger than the
+length of s, then s1 is s and s2 is ""; otherwise, s1 consists of the
+first i characters of s, with s2 holding the remainder.
+&&& string?
+string? ( x -- i )
+Returns 1 if its argument is a string, 0 otherwise.
+&&& stringcmp
+stringcmp ( s1 s2 -- i )
+Compares two strings, returning an integer that is less than, equal to,
+or greater than zero, as s1 is less than, equal to, or greater than s2.
+Both strings are mapped to lower case for purposes of the comparison,
+with machine character values used to determine what constitutes less
+than or greater than after the mapping.
+&&& strlen
+strlen ( s -- i )
+Returns the length of its string argument.
+&&& strncmp
+strncmp ( s1 s2 n -- i )
+Compares two strings.  At most the first n characters are compared;
+this is otherwise identical to strcmp.
+&&& subst
+subst ( s1 s2 s3 -- s )
+Performs substitution.  The returned string s is just the same as s1,
+except that wherever s3 occurs in it, it is replaced with s2.  s3 must
+not be "", but either of the other two arguments may be.  In case
+multiple occurrences of s3 overlap, the ones that are replaced are the
+ones found in a simple left-to-right scan.  When a replacement occurs,
+the left-to-right scan starts afresh; characters before the match point
+and characters coming from s2 are not considered when looking for
+possible occurrences of s3.  Some examples:
+        "xaabaabaax" "cha" "aabaa" subst => "xchabaax"
+        "xaabaaabaax" "cha" "aabaa" subst => "xchaabaax"
+        "xcabaabaax" "cha" "aabaa" subst => "xcabchax"
+        "axxyxyx" "" "xyx" subst => "axyx"
+&&& succ
+succ ( d -- s )
+Returns the success message for the dbref.
+&&& swap
+swap ( x1 x2 -- x2 x1 )
+Exchanges the top two elements of the stack.
+&&& systime
+systime ( -- i )
+Returns the current system time, which presently is an integer number
+of seconds since 00:00:00 GMT, Jan 1, 1970.
+&&& then
+See `man if'.
+&&& thing?
+thing? ( x -- i )
+Returns 1 if the argument is a dbref that refers to a thing, or 0
+otherwise (if the argument isn't a dbref, or is a dbref of some other
+type).
+&&& time
+time ( -- is im ih )
+Returns the current time of day, in seconds, minutes, and hours.  Note
+that this is the time of day in the timezone the muck is running in,
+which doesn't necessarily bear any relation to the timezone any
+particular player is in.
+&&& time_created
+time_created ( d -- i )
+Returns the time the dbref was created, in seconds since 00:00:00 GMT,
+Jan 1, 1970.
+&&& time_modified
+time_modified ( d -- i )
+Returns the time the dbref was last modified, in seconds since 00:00:00
+GMT, Jan 1, 1970.
+&&& time_used
+time_used ( d -- i )
+Returns the time the dbref was last used, in seconds since 00:00:00
+GMT, Jan 1, 1970.
+&&& tolower
+tolower ( s -- s )
+Returns the argument string, with all uppercase characters converted to
+the corresponding lowercase characters.
+&&& touch
+touch ( d -- )
+This sets the last-used time of the dbref to the current time.
+&&& toupper
+toupper ( s -- s )
+Returns the argument string, with all lowercase characters converted to
+the corresponding uppercase characters.
+&&& trig
+trig ( -- d )
+Returns the dbref that triggered the program run; normally this will be
+an exit, but may be something else, particularly when dbrefs are locked
+to programs.  This is always the value initially stored in the trigger
+variable; normally, trigger @ is to be preferred over trig, because the
+former can be changed.
+&&& unlink
+unlink ( d -- )
+Unlinks a room or exit.  If the argument is an exit, it is unlinked
+from everything it is linked to.  If the argument is a room, its
+drop-to, if any, is removed.  Other argument types produce an error.
+The program must be able to build, and except for wizard programs, the
+effective player must own the thing being unlinked.
+&&& unlock
+unlock ( d -- )
+Unlocks a dbref.  Except for wizard programs, the effective player must
+own the dbref.
+&&& unparse_flags
+unparse_flags ( d -- s )
+Returns the flags of the dbref as a string.  This returns the same
+information flagstr does, but in the long, human-readable, form, like
+
+        Type: PLAYER  Flags: Mucker Builder
+or
+        Type: ROOM  Flags: NoInventory Jump_OK Haven Visual
+&&& unparse_lock
+unparse_lock ( d -- s )
+Returns the lock of the dbref as a string.  If the dbref is not locked,
+"*UNLOCKED*" is returned.  The string is intended to be human-readable
+and it is not acceptable as the second argument to lock.  See also
+lockstr.
+&&& var
+var word
+This declares the following word as a variable.  All variable
+declarations must appear outside all : definitions in a program.
+Unfortunately the variable allocation scheme is rather badly broken;
+you are probably better off avoiding variables altogether, except for
+the three built-in ones (me, loc, trigger).
+&&& var?
+var? ( x -- i )
+Returns 1 if its argument is a variable, 0 otherwise.
+&&& while
+while ( x -- )
+format: begin <test> while <body> loop
+
+An indefinite loop.  The <test> code is executed.  The `while' pops
+the top object off the stack; if it is false (see `man logic'), the
+loop terminates and control passes immediately to the code following
+the terminating `loop'.  Otherwise, the <body> code is executed and
+control returns to the beginning of the <test> code.
+
+Note that while the <test> code will normally push one thing on the
+stack, this is not required; when the while is encountered, it just
+takes whatever it finds on the top of the stack as the test value.
+
+Any begin-while loop can be written as a do loop with a break inside
+it.  See `man break' and `man continue'.
+&&& |
+| ( i1 i2 -- i )
+Returns the bitwise OR of its operands.
+&&& ~
+~ ( i -- i')
+Returns the bitwise complement of its operand.
+&&& strftime
+strftime (s i -- s)
+Takes a format string and a SYSTIME integer and returns a string formatted 
+with the time.  The format string is ascii text with formatting commands:
+  %% -- "%"
+  %a -- abbreviated weekday name.
+  %A -- full weekday name.
+  %b -- abbreviated month name.
+  %B -- full month name.
+  %C -- "%A %B %e, %Y"
+  %c -- "%x %X"
+  %D -- "%m/%d/%y"
+  %d -- month day, "01" - "31"
+  %e -- month day, " 1" - "31"
+  %h -- "%b"
+  %H -- hour, "00" - "23"
+  %I -- hour, "01" - "12"
+  %j -- year day, "001" - "366"
+  %k -- hour, " 0" - "23"
+  %l -- hour, " 1" - "12"
+  %M -- minute, "00" - "59"
+  %m -- month, "01" - "12"
+  %p -- "AM" or "PM"
+  %R -- "%H:%M"
+  %r -- "%I:%M:%S %p"
+  %S -- seconds, "00" - "59"
+  %T -- "%H:%M:%S"
+  %U -- week number of the year. "00" - "52"
+  %w -- week day number, "0" - "6"
+  %W -- week# of year, starting on a monday, "00" - "52"
+  %X -- "%H:%M:%S"
+  %x -- "%m/%d/%y"
+  %y -- year, "00" - "99"
+  %Y -- year, "1900" - "2155"
+  %Z -- Time zone.  "GMT", "EDT", "PST", etc.
+&&& stats
+stats ( d -- total rooms exits things programs players garbage )
+Returns the number of objects owned by 'd', or the total objects in
+the system if d == #-1. This is broken up into a total, rooms, exits,
+things, programs, players, and garbage. This functions much as the
+&&& gmtoffset
+GMTOFFSET ( -- i)
+Returns the machine's offset from Grand Meridian Time in seconds.
+&&& stringpfx
+STRINGPFX (s s2 -- i)  Returns 0 if s2 is a prefix of s.  Case insensitive.
+Similar to the STRINGCMP primtive.  If s2 is NOT a prefix of s, then the
+integer difference of the first dissimilar character is returned.
+&&& part_pmatch
+PART_PMATCH (s -- d)  Takes a player name, or the first part of the name,
+and matches it against the names of the players who are currently online.
+If the given string is a prefix of the name of a player who is online,
+then their dbref is returned.  If two players could be matched by the
+given string, it returns a #-2.  If None of the players online match,
+then it returns a #-1.
+&&& smatch
+smatch ( s s -- i )     
+Takes a string and a string pattern to check against.  Returns true if the
+string fits the pattern.  In the pattern string, a '?' matches any single
+character, '*' matches any number of characters. Word matching can be done
+with '{word1|word2|etc}'.  If multiple characters are in [], it will match
+a single character that is in that set of characters.  '[aeiou]' will match
+a single character if it is a vowel, for example.  To search for one of
+these special chars, put a \ in front of it to escape it.  It is not case
+sensitive.  Example pattern: "{Foxen|Lynx|Fiera} *t[iy]ckle*\?"  Will match
+any string starting with 'Foxen', 'Lynx', or 'Fiera', that contains either
+'tickle' or 'tyckle' and ends with a '?'.
+&&& unparseobj 
+unparseobj ( d -- s )
+Returns the name-and-flag string for an object.   This prim uses the standard
+player permissions in getting DBREF and FLAGS, unlike the FB version.
+For example: "One(#1PW)"
+&&& pid
+pid ( i -- i) 
+Returns the pid of the current process.
+&&& isapid?
+ispid? (i -- i)
+Takes a process id and checks to see if a frame is runing with that pid.
+It returns 1 if it is, and 0 if it is not.  ispid? will also return 1 if the 
+given process id is that of the currently running program.
+&&& pstack
+pstack ( i -- )
+  or
+pstack ( i s -- )
+The integer argument is taken as a count of stack elements; the top
+that many elements of the stack are printed.  The output goes to the
+same place the debugging output from programs set D goes.  If the
+string second argument is present, it is printed as a tag at the
+beginning of the line; otherwise, a default ("Stack" as of this
+writing) is used instead.  There is a length limit (about 500
+characters at this writing) on the resulting line; if this is exceeded,
+remaining elements will be printed as "...".  This is intended as a
+debugging aid.
+&&& roll
+roll ( xN ... x1 N M -- xM ... x1 xN ... xM-1 )
+Rotates the top N elements of the stack M places.  If N is less than
+zero, and error occurs; if N is 0, nothing is done but popping N and M
+off the stack.  Otherwise, there must be at least N additional elements
+on the stack (or an error occurs); the top M of them are removed and
+placed below the others.  M is taken modulo N, so the effective M value
+is always 0 through N-1; the value actually found on the stack may be
+any value, positive, negative, or zero.
+&&& propdir?
+propdir? (d s -- i)
+Takes a dbref and a property name, and returns whether that property is a
+propdir that contains other props.  Uses standard property permissions.
+&&& abort
+abort ( s -- )
+  Aborts the MUF program with an error.  ie:  '"Bad vibes." abort' would
+  Stop the MUF program and tell the user a message like:
+  Programmer error.  Please tell Howard the following message:
+  #1234 (line 23) ABORT: Bad vibes.
+&&& checkargs
+checkargs (??? s -- )
+    Takes a string argument that contains an expression that is used
+to test the arguments on the stack below the given string.  If they
+do not match what the expression says should be there, then it aborts
+the running program with an appropriate Program Error Message.  The
+expression is formed from single character argument tests that refer
+to different argument types.  The tests are:
+
+   a - function address.
+   d - dbref.  (#-1, #-2, #-3 are okay)
+   D - valid, non-garbage dbref.  (#-1, #-2 NOT allowed.  #-3 is okay)
+   e - exit dbref.  (#-1, #-2 allowed)
+   E - exit dbref.  (#-1, #-2 NOT allowed)
+   f - program dbref.  (#-1, #-2 allowed)
+   F - program dbref.  (#-1, #-2 NOT allowed)
+   i - integer.
+   p - player dbref.  (#-1, #-2 allowed)
+   P - player dbref.  (#-1, #-2 NOT allowed)
+   r - room dbref.  (#-1, #-2 allowed)  (#-3 is a room)
+   R - room dbref.  (#-1, #-2 NOT allowed)  (#-3 is a room)
+   s - string.
+   S - non-null string.
+   t - thing dbref.  (#-1, #-2 allowed)
+   T - thing dbref.  (#-1, #-2 NOT allowed)
+   v - local or global variable.
+   ? - any stack item type.
+
+Tests can be repeated multiple times by following the test with a number.
+ie: '"i12" checkargs' would test the stack for 12 integers.
+
+The last test in the string expression will be done on the top stack item.
+Tests are done from the top of the stack down, in order, so the last test
+that fails in a string expression will be the one that the Program Error
+will be given for.  ie: '"sdSi" checkargs' will test that the top stack
+item is an integer, then it tests that the next item down is a non-null
+string, then it tests the third item from the top to see if it is a dbref,
+and lastly it tests to make sure that the 4th item from the top is a string.
+
+Spaces are ignored, so "s d i" is the same as "sdi".  However, multipliers
+are ignored if they follow a space, so "s 4d i" is also the same as "sdi".
+This is because you are basically telling it to repeat the space 4 times,
+and since spaces are ignored, it has no effect.
+
+If you have a function that takes a stack item of any type, you can use
+the "?" test.  "?" will match a string, integer, dbref, or any other type.
+
+Since sometimes arguments are passed in ranges, such as the way that the
+explode primitive returns multiple strings with an integer count on top,
+there is a way to group arguments, to show that you expect to recieve a
+range of that type.  ie: '"{s}" checkargs' would test the stack for a set
+of strings like '"first" "second" "third" "fourth" 4' where the top stack
+item tells how many strings to expect within the range.
+
+Sometimes a function takes a range of paired arguments, such as:
+'"one" 1 "two" 2 "three" 3 "four" 4 4' where the count on the top of the
+range refers to the number of pairs.  To test for the range given above,
+you would use '"{si}" checkargs' to tell it that you want to check for
+a range of paired strings and integers.  You can group as many argument
+tests together in a range as you would like.  ie: you could use "{sida}"
+as an expression to test for a range of related strings, integers, dbrefs,
+and function addresses.
+
+Since the argument multipliers refer to the previous test OR range, you
+can test for two string ranges with the test '"{s}2" checkargs'.  ie:
+It would succeed on a stack of: '"one" "two" "three" 3 "four" "five" 2'.
+'"{s2}" checkargs', however, would test for one range of paired strings.
+ie: It would succeed with a stack of: '"one" "1" "two" "2" "three" "3" 3'.
+
+If, for some reason, you need to pass a range of ranges to a function,
+you can test for it by nesting the braces.  ie: '"{{s}}" checkargs'
+
+Now, as one last example, the primitive notify_except, if we were to test
+the arguments passed to it manually, would use the test '"R{p}s" checkargs'
+to test for a valid room dbref, a range of player dbrefs or #-1s, and a
+string.
+&&& timesplit
+timesplit ( -- 8i )  Puts 8 intergers on the stack in the following order.
+sec      /* seconds (0 - 59) */
+min      /* minutes (0 - 59) */
+hour     /* hours (0 - 23) */
+mday     /* day of month (1 - 31) */
+mon      /* month of year (0 - 11) */
+year     /* year - 1900 */
+wday     /* day of week (Sunday = 0) */
+yday     /* day of year (0 - 365) */
+These number correspond with the LOCAL time on the machine.
+&&& gmtsplit
+gmtsplit ( -- 8i )  Puts 8 intergers on the stack in the following order.
+sec      /* seconds (0 - 59) */
+min      /* minutes (0 - 59) */
+hour     /* hours (0 - 23) */
+mday     /* day of month (1 - 31) */
+mon      /* month of year (0 - 11) */
+year     /* year - 1900 */
+wday     /* day of week (Sunday = 0) */
+yday     /* day of year (0 - 365) */
+These number correspond with GMT time.
+&&& floating_points
+pi (  -- p )*                     Returns the valut of pi   3.1415926535
+e (  -- e )*                      Returns the value of e    2.718281828
+frandom ( -- f )*                 Returns a random f between 0 and 1
+sin ( f -- f )*                   Sine of f in radians
+cos ( f -- f )*                   Cosine of f in radians
+tan ( f -- f )*                   Tangent of f in radians
+asin ( f -- f )*                  Arc sin of f in radians
+acos ( f -- f )*                  Arc cosine of f in radians
+atan ( f -- f )*                  Arc tangent of f in radians
+atan2 (f1 f2 -- f )*              Convert rect to polar 
+log10 ( f -- f )*                 logarithm to base 10 
+pow ( f1 f2 -- f )*               f1**f2
+sqrt ( f -- f )*                  square root of f
+cbrt ( f -- f )*                  cube root of f
+sinh ( f -- f )*                  Direct hyperbolic function for f
+cosh ( f -- f )*                  Direct hyperbolic function for f
+tanh ( f -- f )*                  Direct hyperbolic function for f
+asinh ( f -- f )*                 Inverse hyperbolic function for f   
+acosh ( f -- f )*                 Inverse hyperbolic function for f   
+atanh ( f -- f )*                 Inverse hyperbolic function for f   
+ceil ( f -- f )*                  Returns intergeral value >= to f
+floor ( f -- f )*                 Returns intergeral value <= to f
+finite ( f -- i )*                Returns 1 if f1 is zero, subnormal, or normal
+isinf ( f -- i )*                 Returns 1 if f is infinity
+isnan ( f -- i )*                 Returns 1 if f is NaN  
+isnormal ( f -- i )*              Returns 1 if f is normal     
+issubnormal ( f -- i )*           Returns 1 if f is subnormal        
+fabs ( f -- f )*                  Returns the absolute value of f  
+remainder ( f1 f2 -- f )*         Returns a remainder of f1 with respect to f2
+lgamma ( f1 -- f i )*             Returns  ln|G(f)|  and the sign of G(f)
+j0 ( f -- f )*                    j an y functions calculate Bessel functions
+j1 ( f -- f )*                    of the first and second kinds for real args 
+y0 ( f -- f )*                    and integer orders.
+y1 ( f -- f )*                    
+jn ( f i -- f )*                    
+yn ( f i -- f )*                    
+erf ( f -- f )*                   Returns the error function of f where
+                                  erf(f) =2/sqrt(pi) *intergralfrom0
+
+erfc ( f -- f )*                  Returns 1.0-erf(f) computed by methods that
+                                  avoid cancellation fror a large f value
+&&& programming
+compile ( d -- i )*               Compile d  Returns the program size 0 if the
+                                  compile was bad
+uncompile ( d -- i )* [wizard]    Uncompile d and free the RAM is consuming
+delete ( d i -- i )*              Delete line i in program d
+       ( d i1 i2 -- i )*          Delete lines i1 thru 12 in program d
+insert ( d i s -- i )*            Insert s at line i in program d
+prog_size ( d -- i )*             Size of program d
+prog_lines ( d -- i )*            Number of lines in program d
+newprogram ( s -- d )*            Create a new program named s
+new_macro ( s1 s2 -- i )*         Enter a macro name s1 with defintion of s2
+kill_macro ( s -- i )* [wizard]   Remove macro s from the macro tree
+get_macro ( s -- s )*             Get the defintion for macro s
+get_lines ( d i1 i2 -- s1...sn)*  Get i1 to i2 lines of program d
+
+You must own any program to insert, delete, or compile.
+&&& instring
+instring ( s s1 -- i )
+Returns the first occurrence of string s1 in string s, or 0 if s1 is
+not found. Non-case sensitive. See also RINSTRING, INSTR, and RINSTR.
+This is an inserver define to 'tolower swap tolower swap instr'
+&&& rinstring
+rinstring ( s s1 -- i )
+Returns the last occurrence of string s1 in string s, or -1 if s1 is
+not found. Non-case sensitive. See also INSTRING, INSTR, and RINSTR.
+This is an inserver define to 'tolower swap tolower swap rinstr'
+&&& networking
+SOCKET ( -- i )*                   Open a network connection i.
+CONNECT ( i1 s i2 -- i )           Connect socket i1 to host s using port i2.
+CLOSE ( i -- i )*                  Close network connection i.
+READY_READ ( i -- i )*             Is socket i ready for a read?
+READY_WRITE ( i -- i )*            Is socket i ready for a write?
+SOCKET_WRITE ( i s -- i )*         Write s to a socket.
+SOCKET_READ ( i1 i2 -- s )*        Read i2 bytes from a socket i1.
+SOCKET_LAST ( i -- i )*            When socket i was last read/written.
+SOCKET_CONNECTED_AT ( i -- i )*    When socket i was first connected.
+SOCKET_CONNECTED ( i -- i )*       Is socket i in a connected state?
+SOCKET_HOST ( i -- s )*            Hostname socket is connected with.
+SOCKET? ( i -- i )*                Is i a valid socket?
+SOCKET_FGETS( i -- s )*            Read one line from a socket.
+All networking prims are WIZARD only.
+&&& socket
+    SOCKET creats a non-blocking TCP socket.  It returns the file
+    descriptor number associated with that socket.
+&&& connect
+    CONNECT takes an unconnected socket and attempts to open a network
+    connection with a specific host and port.  You should only call connect
+    once.   Since all MUF network connections are non-blocking it should
+    be noted that connect will more then likely return a 1 even though the
+    connection is not established.  See NONBLOCKING for more info.  CONNECT
+    will abort if given an invalid socket number.
+&&& close
+    CLOSE will shutdown a socket.  It should only be called once.  Attempting
+    to close a non-existant socket will result in a -1.  Close returns a 1 
+    if successfull and a 0 if not.
+&&& ready_read
+    READY_READ checks to see if a socket is ready to be read using 
+    SOCKET_READ.  It will return a -1 if given a non-existant socket number.
+&&& ready_write
+    READY_WRITE checks to see if a socket is ready to be written to using 
+    SOCKET_WRITE.  It will return a -1 if given a non-existant socket number.
+    See NONBLOCKING and SOCKET_WRITE for more info.
+&&& socket_read
+    SOCKET_READ attempts to read i2 number of bytes from socket i1.  It
+    returns the number of actual bytes read.  Attempts to read from a 
+    non-existant socket will result in a -1.  See NONBLOCKING for more
+    info.
+&&& socket_write
+    SOCKET_WRITE attempts to write i2 number of bytes to socket i1.  It
+    returns the number of actual bytes written.  Attempts to write to a
+    non-existant socket will result in a -1. Since the MUCK server will not 
+    input LF or CF a special subistitution code is included for writes.  
+    %r gets translated to \r and %n gets translated to \n.  Use %%r and %%n 
+    for litteral '%r' and '%n'
+&&& socket_last 
+    SOCKET_LAST returns the last time in seconds since Jan 1, 1970 a socket 
+    was updated using SOCKET_READ or SOCKET_WRITE.  This prim will return a
+    -1 if given an invalid socket number.
+&&& socket_connected_at 
+    SOCKET_CONNECTED_AT returns the time in seconds since Jan 1, 1970 a 
+    socket as actually connected.  This prim will return a -1 if given an 
+    invalid socket number.
+&&& socket_connected
+    SOCKET_CONNECTED checks to see if a socket is actually in a connected 
+    state.  SOCKET_CONNECTED will return a -1 if given an invalid socket 
+    number or if the connection was refused.
+&&& socket_host
+    SOCKET_HOST returns the hostname of a connected socket.   It will return
+    NULL if the socket is NOT connected or if given an invalid socket.
+&&& socket?
+    socket? returns 1 if the argument is a valid MUF socket
+&&& socket_fgets
+    socket_fgets reads one line from a valid socket. Works very much like
+    the standard C implimentation of fgets.  Don't forget that all MUF
+    networking prims are nonblocking and socket_fgets may return nothing.
+&&& nonblocking
+    Since all MUF networking functions are nonblocking its important that
+    to check that a new socket is in a connected state before attempting to
+    read or write from it.  Use the SOCKET_CONNECTED prim for checking the
+    connected status of a socket.  Use SLEEP to wait for a short period of 
+    time if the connection won't establish right away.
+    Its also important that you check the read/write status of a socket before
+    attempting to receive or send data using SOCKET_READ and SOCKET_WRITE.
+    The prims READY_READ and READY_WRITE can be used to determine the status
+    of a socket's I/O state.
+    PLEASE make sure to call CLOSE on any socket that has finished its task.
+    This will free up system resources needed for players and new sockets.
+&&& STRIPLEAD
+striplead (s -- s)
+Strips leading spaces from the given string.
+&&& STRIPTAIL
+striptail (s -- s)
+Strips trailing spaces from the given string.
+&&& STRIP
+strip (s -- s)
+This is a built in $define.  It is interpreted as "striplead striptail"
+It strips the spaces from both ends of a string.
+&&& connected?
+connected? ( i -- i )
+Returns true if there is a connection on the specified descriptor.
+This will return true for connections that have not yet connected to a
+player; condbref can be used to tell.

@@ -1,0 +1,6 @@
+Muf text files should go here...
+NOTE THAN ANY FILE PLACED IN THIS DIRECTORY IS READABLE BY ANY USER ON THE
+MUCK. 
+
+DON'T put files here that you want to keep secure.   DON'T put binary files
+here.   DON'T put write only files here.

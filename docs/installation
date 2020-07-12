@@ -1,0 +1,105 @@
+Installation is fairly simple:
+
+Run the configure script in the src directory
+modify config.h to fit your preferences and your system.
+modify params.h also.
+DO NOT CHANGE ANY OPTION THAT HAS an o_ notation. 
+modify game/restart
+edit the game/muck.conf file
+
+cd src
+cp netmuck ../game/
+cd ../game
+restart
+
+Compiling TinyMUCK:
+
+The code is written in ANSI C, and is known to compile and run under
+ULTRIX/BSD 4.3/SunOS 4.1 on a VAX 8600, VAX 6400, DEC 3100s/5000s, a
+MicroVAX, a Sun SparcStation/1, and a Sun 3/50.  TinyMUCK is also
+known to have run on a HP9k260, as well as a NeXT.  As far as other
+platforms, you're on your own.
+
+Sun realloc() is braindead.  On every Sun system I have seen, TinyMUCK
+runs about 6 megs in memory with a very small database if the option
+DB_DOUBLING is not defined.  If you are running on a Sun3 or Sun4,
+you should definitely compile with this option turned on.  Let me
+know if there are other systems that need this.
+
+Programs contained in the distribution:
+
+netmuck
+
+ This is the actual server program; it is invoked as 
+
+    netmuck source-file dump-file [port]
+
+If port is not specified it defaults to 4201.  The initial database
+will be read in from source-file, which must contain at least the two
+objects in minimal.db to work well.  The file small.db, which contains
+the core of the original TinyMUD universe, may be a better place to
+start a new universe from.  The netmuck process will write a checkpoint
+out to dump-file every 60000 seconds; the interval can be changed by
+setting DUMP_INTERVAL in config.h.
+
+restart
+
+  This is a bourne shell script which starts the netmuck program.
+  It is invoked as:
+
+    restart dbase-prefix
+eg.,
+    restart minimal
+
+    This will restart the netmuck process using the file minimal.db.new,
+    or, failing that, the file minimal.db.  The source file is renamed
+    and the output is sent to minimal.db.new.  See the shell script for
+    more info.
+
+decompress
+
+ Usage: decompress < compressed-db-file > uncompressed-db-file
+
+The TinyMUD programs "dump", "sanity-check", "extract" and "paths" have
+not yet been converted to the TinyMUCK database format.
+
+I hope that you enjoy using TinyMUCK.  Please send all bug reports, etc.
+to sfwhite@watcgl.waterloo.edu.
+
+Stephen "Ghondahrl" White, March 22, 1990.
+
+---------------------------------------
+Stephen White has since then stopped working on MUCK code, as has
+Lachesis, and so I'm now "the guy" supporting it.
+
+As with him, I don't really care what you do with it, just send me any
+patches that you've made so that I can put them into the next release.
+I most definitely do not want tens of thousands of "patches" out there
+for TinyMUCK --- it makes it hard for me to make the database format
+backward-compatible for your benefit.
+
+Sanity has been put back into the package.  It is run by typing:
+
+	sanity <dbasefile >reportfile
+
+And will print its progress as it proceeds.
+
+I may be contacted by mailing to:
+
+	rearl@piggy.ucsb.edu
+
+or when that fails,
+
+	rearl@piggy.ucsb.edu
+
+When you send me change files, please send entire files, and not
+diffs.
+
+If you plan to become a TinyMUCK developer, please write me.  I will
+provide information on who's working on what, what's being worked on,
+what programming practices to avoid, and possibly a bit of technical
+help.  If you just hack on your site and have no desire whatsoever to
+spread your software to any other sites, there is no need for you to
+do this, but don't whine if future version of TinyMUCK do things in a
+different way, or if something crops up that makes your way of doing
+things break.

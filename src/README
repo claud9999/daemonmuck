@@ -1,0 +1,52 @@
+Follow these easy steps when installing.
+
+
+./configure   
+edit config.h   
+edit Makefile
+make
+mv netmuck ../game
+
+( Do not use the rest of this unless you are tring to disk base.  
+  USE AT YOUR OWN RISK )
+
+make convert unconvert and crush and move them to ../game/data
+edit ../game/restart 
+Run it
+
+
+convert, unconvert, and crush all have the same format:
+<command> <infile> <outfile>
+
+convert in out    ; reads the file named 'in' and produces 'out',
+                    'out.map', and 'out.dat'
+
+unconvert in out  ; reads the files named 'in', 'in.map', and 'in.dat'
+                    and produces 'out'
+
+crush in out      ; reads 'in.map' and 'in.dat' and produces 'out.map'
+                    and 'out.dat'
+
+TECHIE RULES:
+   
+   Use DBFETCHPROP(x) 
+   Do not use DBFETCH(x, properties) except in dbp.c
+   
+   Use DBSTOREPROP(x, p) 
+   Do not use DBSTORE(x, properties, p) except in dbp.c
+   
+   Call dbp_enable() AFTER loading the database
+   
+   Call dbp_disable() IMMEDIATELY after fork in the child process
+   
+   Call dbp_flush() to clear the cache and write everything back to disk
+
+   Call dbp_sync() to write the cache contents back to disk without clearing
+   
+   Call dbp_disable() before shutdown
+   
+   Change dbp_max_objects to anything you want, as long as it is
+    greater than zero
+   
+   NOTE:  As currently shipped, no attempt will be made to flush in the
+    event of a panic database dump;  you will lose some data.
