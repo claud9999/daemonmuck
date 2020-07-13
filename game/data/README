@@ -4,7 +4,7 @@ the 'restart' script for your site.
 
 The 'in' file is the initial database to be used with the game.
 It is the 'minimal.db' for the server.  It contains two objects; a room and
-a Wizard chararacter. The player is 'Wizard' with the password 'foo'.
+a Wizard character. The player is 'Wizard' with the password 'foo'.
 
 Also, the lockout.text for sites you don't wish to connect should go here.
 The reg.text is for sites that must register.  The tabooname.text are those
